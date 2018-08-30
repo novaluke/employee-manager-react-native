@@ -8,10 +8,12 @@
     "lint": "yarn eslint src && yarn tslint -p tsconfig.json && yarn tsc --noEmit"
   },
   "dependencies": {
+    "@types/react-native-communications": "^2.2.1",
     "firebase": "5.0.0",
     "prop-types": "^15.6.2",
     "react": "16.4.1",
     "react-native": "0.56.0",
+    "react-native-communications": "^2.2.1",
     "react-navigation": "^2.11.2",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",

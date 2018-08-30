@@ -696,6 +696,10 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-native-communications@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@types/react-native-communications/-/react-native-communications-2.2.1.tgz#fe067d9d226090cea34a62de8c6ac71f92caeeb9"
+
 "@types/react-native@*", "@types/react-native@^0.56.6":
   version "0.56.8"
   resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.56.8.tgz#7752e47369a59672bbabd5552d2de76a86442ecd"
@@ -4997,6 +5001,10 @@ react-is@^16.4.1:
 react-lifecycles-compat@^3, react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
+
+react-native-communications@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/react-native-communications/-/react-native-communications-2.2.1.tgz#7883b56b20a002eeb790c113f8616ea8692ca795"
 
 react-native-dismiss-keyboard@1.0.0:
   version "1.0.0"

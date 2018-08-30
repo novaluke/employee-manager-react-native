@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import reactNativeCommunications from "react-native-communications";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
@@ -32,6 +33,9 @@ const renderButton = (isLoading: boolean, onSubmit: () => void) => {
   }
   return <Button onPress={onSubmit}>Save</Button>;
 };
+
+const textSchedule = (phone: string, shift: ShiftDay) => () =>
+  reactNativeCommunications.text(phone, `Your upcoming shift is on ${shift}`);
 
 class EditEmployee extends Component<IProps> {
   public static navigationOptions = ({
@@ -73,6 +77,10 @@ class EditEmployee extends Component<IProps> {
               navigation,
             ),
           )}
+        </CardSection>
+
+        <CardSection>
+          <Button onPress={textSchedule(phone, shift)}>Text schedule</Button>
         </CardSection>
       </Card>
     );
