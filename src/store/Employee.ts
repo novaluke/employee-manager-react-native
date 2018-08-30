@@ -22,14 +22,14 @@ export enum ShiftDay {
   Sunday = "Sunday",
 }
 
-export interface IEmployee {
+export interface IEmployee<T extends null | string> {
   employeeName: string;
   phone: string;
   shift: ShiftDay;
-  uid: null | string;
+  uid: T;
 }
 
-export interface IEmployeeState extends IEmployee {
+export interface IEmployeeState extends IEmployee<null | string> {
   error: string;
   loading: boolean;
 }
@@ -55,8 +55,8 @@ export type EmployeeAction =
   | { type: EmployeeActionType.CREATE_START }
   | { type: EmployeeActionType.CREATE_SUCCESS }
   | { type: EmployeeActionType.CREATE_FAIL }
-  | { type: EmployeeActionType.EDIT; payload: IEmployee }
-  | { type: EmployeeActionType.RESET; payload: IEmployee };
+  | { type: EmployeeActionType.EDIT; payload: IEmployee<string> }
+  | { type: EmployeeActionType.RESET };
 
 type EmployeeDispatch = Dispatch<EmployeeAction>;
 
@@ -94,7 +94,7 @@ const createFail = (dispatch: EmployeeDispatch) => () =>
   dispatch(createAction(EmployeeActionType.CREATE_FAIL));
 
 export const createEmployee = (
-  employee: IEmployee,
+  employee: IEmployee<null>,
   navigation: NavigationScreenProp<any>,
 ) => (dispatch: EmployeeDispatch) => {
   const { currentUser } = firebase.auth();
@@ -113,7 +113,7 @@ export const createEmployee = (
 
 export const editEmployee = (
   navigation: NavigationScreenProp<any>,
-  employee: IEmployee,
+  employee: IEmployee<string>,
 ) => (dispatch: EmployeeDispatch) => {
   dispatch(createAction(EmployeeActionType.EDIT, employee));
   navigation.navigate("CreateEmployee");

@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 interface IProps extends NavigationScreenProps {
   dispatchWatchEmployees: (navigation: NavigationScreenProp<any>) => void;
   dispatchEditEmployee: any;
-  employees: { [uid: string]: IEmployee };
+  employees: { [uid: string]: IEmployee<string> };
   loading: boolean;
 }
 
@@ -60,7 +60,11 @@ class EmployeeList extends Component<IProps> {
     unwatchEmployees(navigation);
   }
 
-  private renderEmployee = ({ item: employee }: { item: IEmployee }) => {
+  private renderEmployee = ({
+    item: employee,
+  }: {
+    item: IEmployee<string>;
+  }) => {
     const { dispatchEditEmployee, navigation } = this.props;
     const onPress = () => dispatchEditEmployee(navigation, employee);
     return (

@@ -51,7 +51,7 @@ interface IProps extends NavigationScreenProps {
   shift: ShiftDay;
   dispatchFieldUpdate: (payload: FieldUpdatePayload) => void;
   dispatchCreateEmployee: (
-    employee: IEmployee,
+    employee: IEmployee<null>,
     navigation: NavigationScreenProp<any>,
   ) => void;
   dispatchResetForm: () => void;

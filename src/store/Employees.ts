@@ -22,7 +22,7 @@ type EmployeesDispatch = Dispatch<EmployeesAction>;
 
 export interface IEmployeesState {
   loading: boolean;
-  employees: { [uid: string]: IEmployee };
+  employees: { [uid: string]: IEmployee<string> };
 }
 
 const INITIAL_STATE: IEmployeesState = {
