@@ -20,7 +20,7 @@ export interface IAuthState {
   user: firebase.auth.UserCredential | null;
 }
 
-const INITIAL_STATE: IAuthState = {
+export const INITIAL_STATE: IAuthState = {
   email: "",
   loginAction: { state: "INIT" },
   password: "",
@@ -51,7 +51,7 @@ export const authReducer: Reducer<IAuthState, AuthAction> = (
     case AuthActionType.LOGIN_START:
       return { ...state, loginAction: { state: "PROGRESS" } };
     case AuthActionType.LOGIN_SUCCESS:
-      return { ...state, ...INITIAL_STATE, user: action.payload };
+      return { ...INITIAL_STATE, user: action.payload };
     case AuthActionType.LOGIN_FAIL:
       return {
         ...state,
