@@ -35,7 +35,7 @@ const RootNavigator = createSwitchNavigator(
 
 firebase.initializeApp(firebaseConfigJson);
 
-const App = () => (
+const App: React.SFC = () => (
   <Provider store={store}>
     <View style={{ flex: 1 }}>
       <RootNavigator />
