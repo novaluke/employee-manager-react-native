@@ -7,7 +7,7 @@ import { emailChanged, logIn, passwordChanged } from "../store/Auth";
 
 import { AsyncButton, Card, CardSection, Input } from "./common";
 
-interface IProps extends NavigationScreenProps {
+export interface IProps extends NavigationScreenProps {
   email: string;
   password: string;
   dispatchPasswordChanged: (password: string) => void;
