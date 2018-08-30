@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Confirm renders correctly 1`] = `
+<Modal
+  animationType="slide"
+  onRequestClose={[MockFunction]}
+  visible={false}
+>
+  <View>
+    <CardSection>
+      <Text
+        style={
+          Object {
+            "fontSize": 18,
+            "paddingLeft": 5,
+            "paddingRight": 5,
+          }
+        }
+      >
+        Are you sure you want to do that?
+      </Text>
+    </CardSection>
+  </View>
+  <View>
+    <CardSection>
+      <Button
+        onPress={[MockFunction]}
+      >
+        Yes
+      </Button>
+    </CardSection>
+    <CardSection>
+      <Button
+        onPress={[MockFunction]}
+      >
+        No
+      </Button>
+    </CardSection>
+  </View>
+</Modal>
+`;

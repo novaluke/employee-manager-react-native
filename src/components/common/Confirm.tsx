@@ -32,12 +32,7 @@ const Confirm: React.SFC<IProps> = ({
   onYes,
   onNo,
 }) => (
-  <Modal
-    animationType="slide"
-    transparent={false}
-    visible={isVisible}
-    onRequestClose={onNo}
-  >
+  <Modal animationType="slide" visible={isVisible} onRequestClose={onNo}>
     <View>
       <CardSection>
         <Text style={styles.textStyle}>{text}</Text>
