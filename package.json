@@ -34,7 +34,6 @@
     "enzyme": "^3.4.4",
     "enzyme-adapter-react-16": "^1.2.0",
     "enzyme-react-16-adapter-setup": "^0.1.0",
-    "enzyme-to-json": "^3.3.4",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^17.0.0",
     "eslint-config-prettier": "^2.9.0",
@@ -79,9 +78,6 @@
         "useBabelrc": true
       }
     },
-    "snapshotSerializers": [
-      "enzyme-to-json/serializer"
-    ],
     "setupTestFrameworkScriptFile": "<rootDir>/node_modules/jest-enzyme/lib/index.js",
     "setupFiles": [
       "enzyme-react-16-adapter-setup"
