@@ -1,4 +1,5 @@
 import firebase from "firebase";
+import { NavigationScreenProp } from "react-navigation";
 import { Dispatch, Reducer } from "redux";
 import { action as createAction } from "typesafe-actions";
 
@@ -58,9 +59,12 @@ export const authReducer: Reducer<IAuthState, AuthAction> = (
   }
 };
 
-const loginSuccess = (dispatch: AuthDispatch) => (
+const loginSuccess = (dispatch: AuthDispatch, navigate: any) => (
   user: firebase.auth.UserCredential,
-) => dispatch(createAction(AuthActionType.LOGIN_SUCCESS, user));
+) => {
+  dispatch(createAction(AuthActionType.LOGIN_SUCCESS, user));
+  navigate("Main");
+};
 
 const loginFail = (dispatch: AuthDispatch) => () =>
   dispatch(createAction(AuthActionType.LOGIN_FAIL));
@@ -71,19 +75,21 @@ export const emailChanged = (email: string) =>
 export const passwordChanged = (password: string) =>
   createAction(AuthActionType.PASSWORD_CHANGED, password);
 
-export const logIn = (email: string, password: string) => (
-  dispatch: AuthDispatch,
-) => {
+export const logIn = (
+  email: string,
+  password: string,
+  navigation: NavigationScreenProp<any>,
+) => (dispatch: AuthDispatch) => {
   dispatch(createAction(AuthActionType.LOGIN_START));
   firebase
     .auth()
     .signInWithEmailAndPassword(email, password)
-    .then(loginSuccess(dispatch))
+    .then(loginSuccess(dispatch, navigation.navigate))
     .catch(() =>
       firebase
         .auth()
         .createUserWithEmailAndPassword(email, password)
-        .then(loginSuccess(dispatch))
+        .then(loginSuccess(dispatch, navigation.navigate))
         .catch(loginFail(dispatch)),
     );
 };

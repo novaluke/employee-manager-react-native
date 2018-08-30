@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, Text } from "react-native";
+import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
 import { emailChanged, logIn, passwordChanged } from "../store/Auth";
@@ -29,11 +30,15 @@ const styles = StyleSheet.create({
   },
 });
 
-interface IProps {
+interface IProps extends NavigationScreenProps {
   email: string;
   password: string;
   dispatchPasswordChanged: (password: string) => void;
-  dispatchLogIn: (email: string, password: string) => void;
+  dispatchLogIn: (
+    email: string,
+    password: string,
+    navigation: NavigationScreenProp<any>,
+  ) => void;
   error: string;
   loading: boolean;
   dispatchEmailChanged: (email: string) => void;
@@ -49,6 +54,7 @@ const LoginForm: React.SFC<IProps> = props => {
     dispatchLogIn,
     error,
     loading,
+    navigation,
   } = props;
   return (
     <Card>
@@ -79,7 +85,9 @@ const LoginForm: React.SFC<IProps> = props => {
       )}
 
       <CardSection>
-        {renderButton(loading, () => dispatchLogIn(email, password))}
+        {renderButton(loading, () =>
+          dispatchLogIn(email, password, navigation),
+        )}
       </CardSection>
     </Card>
   );

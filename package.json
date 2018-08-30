@@ -12,6 +12,7 @@
     "prop-types": "^15.6.2",
     "react": "16.4.1",
     "react-native": "0.56.0",
+    "react-navigation": "^2.11.2",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",
     "redux-thunk": "^2.3.0",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@types/react": "^16.4.9",
     "@types/react-native": "^0.56.6",
+    "@types/react-navigation": "^2.0.15",
     "@types/react-redux": "^6.0.6",
     "babel-eslint": "^8.2.6",
     "babel-jest": "23.4.2",
