@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmployeeList with loaded Employees displays loaded Employees 1`] = `
+<View>
+  <RCTScrollView
+    data={
+      Array [
+        Object {
+          "employeeName": "foo",
+          "phone": "1234",
+          "shift": "Monday",
+          "uid": "uid1",
+        },
+        Object {
+          "employeeName": "bar",
+          "phone": "1234",
+          "shift": "Monday",
+          "uid": "uid2",
+        },
+      ]
+    }
+    disableVirtualization={false}
+    getItem={[Function]}
+    getItemCount={[Function]}
+    horizontal={false}
+    initialNumToRender={10}
+    keyExtractor={[Function]}
+    maxToRenderPerBatch={10}
+    numColumns={1}
+    onContentSizeChange={[Function]}
+    onEndReachedThreshold={2}
+    onLayout={[Function]}
+    onMomentumScrollEnd={[Function]}
+    onScroll={[Function]}
+    onScrollBeginDrag={[Function]}
+    onScrollEndDrag={[Function]}
+    renderItem={[Function]}
+    scrollEventThrottle={50}
+    stickyHeaderIndices={Array []}
+    updateCellsBatchingPeriod={50}
+    viewabilityConfigCallbackPairs={Array []}
+    windowSize={21}
+  >
+    <View>
+      <View
+        onLayout={[Function]}
+        style={null}
+      >
+        <TouchableOpacity
+          onPress={[Function]}
+        >
+          <View
+            style={
+              Array [
+                Object {
+                  "backgroundColor": "#fff",
+                  "borderBottomWidth": 1,
+                  "borderColor": "#ddd",
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "padding": 5,
+                  "position": "relative",
+                },
+                undefined,
+              ]
+            }
+          >
+            <Text>
+              foo
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+      <View
+        onLayout={[Function]}
+        style={null}
+      >
+        <TouchableOpacity
+          onPress={[Function]}
+        >
+          <View
+            style={
+              Array [
+                Object {
+                  "backgroundColor": "#fff",
+                  "borderBottomWidth": 1,
+                  "borderColor": "#ddd",
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "padding": 5,
+                  "position": "relative",
+                },
+                undefined,
+              ]
+            }
+          >
+            <Text>
+              bar
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;

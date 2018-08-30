@@ -11,6 +11,7 @@ import App from "../src/App";
 import { store } from "../src/store";
 
 jest.mock("../src/components/InitializingScreen", () => "InitializingScreen");
+jest.unmock("firebase");
 
 describe("root App component", () => {
   it("provides the store to all components", () => {
@@ -20,7 +21,9 @@ describe("root App component", () => {
   });
 
   it("initializes the firebase instance", () => {
-    expect(firebase.initializeApp).toHaveBeenCalledWith(firebaseConfigJson);
+    expect(firebase.apps[0] && firebase.apps[0]!.options).toEqual(
+      firebaseConfigJson,
+    );
   });
 
   it("loads InitializingScreen as the initial screen", () => {

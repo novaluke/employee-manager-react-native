@@ -77,6 +77,7 @@ class EmployeeList extends Component<IProps> {
 
   public render() {
     const { employeesAction } = this.props;
+    const keyExtractor = ({ uid }: IEmployee<string>) => uid;
     return (
       <View>
         {employeesAction.state === "PROGRESS" && (
@@ -86,10 +87,10 @@ class EmployeeList extends Component<IProps> {
           <FlatList
             data={Object.keys(employeesAction.value).map((uid: string) => ({
               uid,
-              key: uid, // For React element list indexing
               ...employeesAction.value[uid],
             }))}
             renderItem={this.renderEmployee}
+            keyExtractor={keyExtractor}
           />
         )}
       </View>
