@@ -31,6 +31,10 @@ module.exports = {
       "no-undef": "off",
       "no-unused-vars": "off",
       "no-use-before-define": "off",
+      "import/no-extraneous-dependencies": ["error", {
+        devDependencies: ["testSetup.ts", "**/__tests__/**"],
+        optionalDependencies: false,
+      }],
     }
   }]
 };

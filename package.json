@@ -21,6 +21,9 @@
     "typesafe-actions": "^2.0.4"
   },
   "devDependencies": {
+    "@types/enzyme": "^3.1.13",
+    "@types/enzyme-adapter-react-16": "^1.0.3",
+    "@types/jest": "^23.3.1",
     "@types/react": "^16.4.9",
     "@types/react-native": "^0.56.6",
     "@types/react-navigation": "^2.0.15",
@@ -28,6 +31,10 @@
     "babel-eslint": "^8.2.6",
     "babel-jest": "23.4.2",
     "babel-preset-react-native": "^5",
+    "enzyme": "^3.4.4",
+    "enzyme-adapter-react-16": "^1.2.0",
+    "enzyme-react-16-adapter-setup": "^0.1.0",
+    "enzyme-to-json": "^3.3.4",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^17.0.0",
     "eslint-config-prettier": "^2.9.0",
@@ -36,9 +43,11 @@
     "eslint-plugin-prettier": "^2.6.2",
     "eslint-plugin-react": "^7.10.0",
     "jest": "23.4.2",
+    "jest-enzyme": "^6.0.3",
     "prettier": "^1.14.1",
+    "react-dom": "^16.4.2",
     "react-native-typescript-transformer": "^1.2.10",
-    "react-test-renderer": "16.4.1",
+    "ts-jest": "^23.1.4",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.9.2",
     "tslint-config-prettier": "^1.14.0",
@@ -48,6 +57,34 @@
     "typescript-eslint-parser": "^18.0.0"
   },
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "transform": {
+      "^.+\\.jsx?$": "<rootDir>/node_modules/react-native/jest/preprocessor.js",
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(jest-)?react-native|react-navigation)"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "globals": {
+      "ts-jest": {
+        "useBabelrc": true
+      }
+    },
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
+    "setupTestFrameworkScriptFile": "<rootDir>/node_modules/jest-enzyme/lib/index.js",
+    "setupFiles": [
+      "enzyme-react-16-adapter-setup"
+    ]
   }
 }
