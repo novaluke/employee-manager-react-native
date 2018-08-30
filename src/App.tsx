@@ -1,20 +1,26 @@
-import firebase from "firebase";
+// React must come first to supply polyfills for the React Native environment
 import * as React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+
+import firebase from "firebase";
 import { createStackNavigator, createSwitchNavigator } from "react-navigation";
 import { Provider } from "react-redux";
 
 import firebaseConfigJson from "../firebaseConfig.json";
 import { store } from "./store";
 
+import CreateEmployee from "./components/CreateEmployee";
+import EmployeeList from "./components/EmployeeList";
 import InitializingScreen from "./components/InitializingScreen";
 import LoginForm from "./components/LoginForm";
 
-const Home = () => <Text>Home</Text>;
-
-const MainStackNavigator = createStackNavigator({
-  Home,
-});
+const MainStackNavigator = createStackNavigator(
+  {
+    CreateEmployee,
+    EmployeeList,
+  },
+  { initialRouteName: "EmployeeList" },
+);
 
 const RootNavigator = createSwitchNavigator(
   {
@@ -22,7 +28,7 @@ const RootNavigator = createSwitchNavigator(
     Initializing: InitializingScreen,
     Main: MainStackNavigator,
   },
-  { initialRouteName: "Initializing" },
+  { initialRouteName: "Main" },
 );
 
 firebase.initializeApp(firebaseConfigJson);

@@ -3,6 +3,7 @@ import { StyleSheet, Text } from "react-native";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
+import { IRootState } from "../store";
 import { emailChanged, logIn, passwordChanged } from "../store/Auth";
 
 import {
@@ -93,16 +94,7 @@ const LoginForm: React.SFC<IProps> = props => {
   );
 };
 
-interface IState {
-  auth: {
-    email: string;
-    error: string;
-    loading: boolean;
-    password: string;
-  };
-}
-
-const mapStateToProps = (state: IState) => {
+const mapStateToProps = (state: IRootState) => {
   const { email, password, loading, error } = state.auth;
   return {
     email,

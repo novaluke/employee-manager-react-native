@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ViewProps } from "react-native";
 
 const styles = StyleSheet.create({
   containerStyle: {
@@ -13,8 +13,10 @@ const styles = StyleSheet.create({
   },
 });
 
-const CardSection: React.SFC<{}> = ({ children }) => (
-  <View style={styles.containerStyle}>{children}</View>
+const CardSection: React.SFC<ViewProps> = ({ children, style, ...rest }) => (
+  <View style={[styles.containerStyle, style]} {...rest}>
+    {children}
+  </View>
 );
 
 export default CardSection;

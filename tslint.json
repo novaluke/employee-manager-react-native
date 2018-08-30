@@ -16,7 +16,8 @@
     "jsx-boolean-value": false,
     "no-unused-expression": true,
     "no-unused-variable": true,
-    "object-literal-sort-keys": [true, "shorthand-first"]
+    "object-literal-sort-keys": [true, "shorthand-first"],
+    "member-ordering": false
   },
   "rulesDirectory": [],
   "linterOptions": {
