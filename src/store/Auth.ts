@@ -84,7 +84,7 @@ export const logIn = (
   navigation: NavigationScreenProp<any>,
 ) => (dispatch: AuthDispatch) => {
   dispatch(createAction(AuthActionType.LOGIN_START));
-  firebase
+  return firebase
     .auth()
     .signInWithEmailAndPassword(email, password)
     .then(loginSuccess(dispatch, navigation.navigate))
