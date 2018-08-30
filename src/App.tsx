@@ -30,7 +30,7 @@ const RootNavigator = createSwitchNavigator(
     Initializing: InitializingScreen,
     Main: MainStackNavigator,
   },
-  { initialRouteName: "Main" },
+  { initialRouteName: "Initializing" },
 );
 
 firebase.initializeApp(firebaseConfigJson);
