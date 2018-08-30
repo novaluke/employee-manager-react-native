@@ -8,13 +8,13 @@ import { IEmployee } from "./Employee";
 
 export enum EmployeesActionType {
   WATCH_START = "WATCH_START",
-  WATCH_END = "WATCH_END",
+  UNSUBSCRIBE = "UNSUBSCRIBE",
   EMPLOYEES_FETCHED = "EMPLOYEES_FETCHED",
 }
 
 export type EmployeesAction =
-  | { type: EmployeesActionType.WATCH_START }
-  | { type: EmployeesActionType.WATCH_END }
+  | { type: EmployeesActionType.WATCH_START; payload: () => void }
+  | { type: EmployeesActionType.UNSUBSCRIBE }
   | {
       type: EmployeesActionType.EMPLOYEES_FETCHED;
       payload: firebase.database.DataSnapshot;
@@ -23,10 +23,12 @@ type EmployeesDispatch = Dispatch<EmployeesAction>;
 
 export interface IEmployeesState {
   employeesAction: Async<{ [uid: string]: IEmployee<string> }>;
+  unsubscribe: (() => void) | null;
 }
 
-const INITIAL_STATE: IEmployeesState = {
+export const INITIAL_STATE: IEmployeesState = {
   employeesAction: { state: "INIT" },
+  unsubscribe: null,
 };
 
 export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
@@ -35,9 +37,19 @@ export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
 ) => {
   switch (action.type) {
     case EmployeesActionType.WATCH_START:
-      return { ...state, employeesAction: { state: "PROGRESS" } };
-    case EmployeesActionType.WATCH_END:
-      return state;
+      if (state.unsubscribe) {
+        state.unsubscribe();
+      }
+      return {
+        ...state,
+        employeesAction: { state: "PROGRESS" },
+        unsubscribe: action.payload,
+      };
+    case EmployeesActionType.UNSUBSCRIBE:
+      if (state.unsubscribe) {
+        state.unsubscribe();
+      }
+      return { ...state, employeesAction: { state: "INIT" } };
     case EmployeesActionType.EMPLOYEES_FETCHED:
       return {
         ...state,
@@ -51,22 +63,8 @@ export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
   }
 };
 
-let watchingFunc:
-  | ((snapshot: firebase.database.DataSnapshot) => void)
-  | undefined;
-
-export const unwatchEmployees = (navigation: NavigationScreenProp<any>) => {
-  const { currentUser } = firebase.auth();
-  if (currentUser === null) {
-    navigation.navigate("Auth");
-  } else {
-    firebase
-      .database()
-      .ref(`/users/${currentUser.uid}/employees`)
-      .off("value", watchingFunc);
-    watchingFunc = undefined;
-  }
-};
+export const unwatchEmployees = () =>
+  createAction(EmployeesActionType.UNSUBSCRIBE);
 
 export const watchEmployees = (navigation: NavigationScreenProp<any>) => (
   dispatch: EmployeesDispatch,
@@ -74,19 +72,30 @@ export const watchEmployees = (navigation: NavigationScreenProp<any>) => (
   const { currentUser } = firebase.auth();
   if (currentUser === null) {
     navigation.navigate("Auth");
-  } else if (watchingFunc === undefined) {
-    dispatch(createAction(EmployeesActionType.WATCH_START));
-    watchingFunc = firebase
-      .database()
-      .ref(`/users/${currentUser.uid}/employees`)
-      .on(
-        "value",
-        (snapshot: firebase.database.DataSnapshot | null) =>
-          snapshot
-            ? dispatch(
-                createAction(EmployeesActionType.EMPLOYEES_FETCHED, snapshot),
-              )
-            : null,
-      );
+    return () => null;
   }
+  const refString = `/users/${currentUser.uid}/employees`;
+  // Need to type annotate it or else firebase complains when passing the
+  // function to `.off`, which is probably a bug since `.off` is supposed to
+  // accept functions passed to `.on`, so anything `.on` accepts `.off` should
+  // also accept.
+  const watchingFunc: (a: firebase.database.DataSnapshot) => void = firebase
+    .database()
+    .ref(refString)
+    .on(
+      "value",
+      (snapshot: firebase.database.DataSnapshot | null) =>
+        snapshot
+          ? dispatch(
+              createAction(EmployeesActionType.EMPLOYEES_FETCHED, snapshot),
+            )
+          : null,
+    );
+  const unsubscribe = () =>
+    firebase
+      .database()
+      .ref(refString)
+      .off("value", watchingFunc);
+  dispatch(createAction(EmployeesActionType.WATCH_START, unsubscribe));
+  return watchingFunc;
 };
