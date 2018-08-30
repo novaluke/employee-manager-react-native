@@ -1,0 +1,3 @@
+rootProject.name = 'rnEmployeeManager'
+
+include ':app'
