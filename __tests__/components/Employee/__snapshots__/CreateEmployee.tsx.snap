@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateEmployee renders properly 1`] = `
+<Card>
+  <EmployeeForm
+    createAction={
+      Object {
+        "state": "INIT",
+      }
+    }
+    dispatchCreateEmployee={[Function]}
+    dispatchFieldUpdate={[Function]}
+    dispatchResetForm={[Function]}
+    employeeName="Taylor"
+    navigation={
+      Object {
+        "addListener": [MockFunction],
+        "closeDrawer": [MockFunction],
+        "dismiss": [MockFunction],
+        "dispatch": [MockFunction],
+        "getParam": [MockFunction],
+        "goBack": [MockFunction],
+        "isFocused": [MockFunction],
+        "navigate": [MockFunction],
+        "openDrawer": [MockFunction],
+        "pop": [MockFunction],
+        "popToTop": [MockFunction],
+        "push": [MockFunction],
+        "replace": [MockFunction],
+        "setParams": [MockFunction],
+        "state": Object {},
+        "toggleDrawer": [MockFunction],
+      }
+    }
+    phone="555-5555"
+    shift="Monday"
+  />
+  <CardSection>
+    <AsyncButton
+      asyncAction={
+        Object {
+          "state": "INIT",
+        }
+      }
+      label="Create"
+      onPress={[Function]}
+    />
+  </CardSection>
+</Card>
+`;
