@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmployeeList fire employee confirmation modal renders correctly 1`] = `
+<Confirm
+  isVisible={false}
+  onNo={[Function]}
+  onYes={[Function]}
+  text="Are you sure you want to fire Taylor?"
+/>
+`;
+
+exports[`EmployeeList sets the page title based on the employeeName 1`] = `"Edit Taylor"`;
