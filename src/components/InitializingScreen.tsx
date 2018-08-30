@@ -4,9 +4,7 @@ import { NavigationScreenProps } from "react-navigation";
 
 import { Spinner, SpinnerSize } from "./common";
 
-interface IProps extends NavigationScreenProps {
-  dispatchAuthChanged: (user: firebase.User | null) => void;
-}
+export type IProps = NavigationScreenProps;
 
 class InitializingScreen extends Component<IProps> {
   private unsubscribeAuthChanged: (() => void) | null = null;
