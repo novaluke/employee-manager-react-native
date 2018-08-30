@@ -1,0 +1,26 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended",
+    "tslint-eslint-rules",
+    "tslint-config-airbnb",
+    "tslint-react",
+    "tslint-config-prettier"
+  ],
+  "jsRules": {},
+  "rules": {
+    "variable-name": [true, "ban-keywrods", "check-format", "allow-pascal-case"],
+    "import-name": [true, {
+      "react": "React"
+    }],
+    "jsx-boolean-value": false,
+    "no-unused-expression": true,
+    "no-unused-variable": true
+  },
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": [
+      "firebaseConfig.json"
+    ]
+  }
+}

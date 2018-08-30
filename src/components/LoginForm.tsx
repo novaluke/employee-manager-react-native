@@ -1,29 +1,45 @@
 import React from "react";
-import { Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
 
-import { emailChanged, passwordChanged, logIn } from "../actions";
+import { emailChanged, logIn, passwordChanged } from "../store/Auth";
 
-import { Card, CardSection, Input, Button, Spinner } from "./common";
+import {
+  Button,
+  Card,
+  CardSection,
+  Input,
+  Spinner,
+  SpinnerSize,
+} from "./common";
 
-const renderButton = (isLoading, onSubmit) => {
+const renderButton = (isLoading: boolean, onSubmit: () => void) => {
   if (isLoading) {
-    return <Spinner size="large" />;
+    return <Spinner size={SpinnerSize.Large} />;
   }
 
   return <Button onPress={onSubmit}>Log in</Button>;
 };
 
-const styles = {
+const styles = StyleSheet.create({
   errorTextStyle: {
+    alignSelf: "center",
     color: "red",
     fontSize: 20,
-    alignSelf: "center"
-  }
-};
+  },
+});
 
-const LoginForm = props => {
+interface IProps {
+  email: string;
+  password: string;
+  dispatchPasswordChanged: (password: string) => void;
+  dispatchLogIn: (email: string, password: string) => void;
+  error: string;
+  loading: boolean;
+  dispatchEmailChanged: (email: string) => void;
+}
+
+const LoginForm: React.SFC<IProps> = props => {
   const { errorTextStyle } = styles;
   const {
     email,
@@ -32,7 +48,7 @@ const LoginForm = props => {
     dispatchPasswordChanged,
     dispatchLogIn,
     error,
-    loading
+    loading,
   } = props;
   return (
     <Card>
@@ -69,30 +85,22 @@ const LoginForm = props => {
   );
 };
 
-LoginForm.propTypes = {
-  dispatchEmailChanged: PropTypes.func.isRequired,
-  dispatchPasswordChanged: PropTypes.func.isRequired,
-  dispatchLogIn: PropTypes.func.isRequired,
-  email: PropTypes.string,
-  password: PropTypes.string,
-  error: PropTypes.string,
-  loading: PropTypes.bool
-};
+interface IState {
+  auth: {
+    email: string;
+    error: string;
+    loading: boolean;
+    password: string;
+  };
+}
 
-LoginForm.defaultProps = {
-  email: "",
-  password: "",
-  error: "",
-  loading: false
-};
-
-const mapStateToProps = state => {
+const mapStateToProps = (state: IState) => {
   const { email, password, loading, error } = state.auth;
   return {
     email,
-    password,
+    error,
     loading,
-    error
+    password,
   };
 };
 
@@ -100,7 +108,7 @@ export default connect(
   mapStateToProps,
   {
     dispatchEmailChanged: emailChanged,
+    dispatchLogIn: logIn,
     dispatchPasswordChanged: passwordChanged,
-    dispatchLogIn: logIn
-  }
+  },
 )(LoginForm);
