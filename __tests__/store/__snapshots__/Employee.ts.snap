@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`reducer employee creation when the request fails sets an error message on the creation asyncAction that matches a snapshot 1`] = `"Something went wrong!"`;
+
+exports[`reducer firing an employee when the request fails sets an error message on the 'fire employee' asyncAction that matches a snapshot 1`] = `"Something went wrong!"`;
+
+exports[`reducer saving an existing employee when the request fails sets an error message on the update asyncAction that matches a snapshot 1`] = `"Something went wrong!"`;

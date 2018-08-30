@@ -46,7 +46,7 @@ export interface IEmployeeState extends IEmployee<null | string> {
   fireModalShown: boolean;
 }
 
-const INITIAL_STATE: IEmployeeState = {
+export const INITIAL_STATE: IEmployeeState = {
   createAction: { state: "INIT" },
   employeeName: "",
   fireAction: { state: "INIT" },
@@ -153,13 +153,19 @@ export const createEmployee = (
     navigation.navigate("Auth");
   } else {
     dispatch(createAction(EmployeeActionType.CREATE_START));
-    firebase
-      .database()
-      .ref(`/users/${currentUser.uid}/employees`)
-      .push(employee)
-      // Have to put error handler within `.then` due to Firebase idiosyncracity
-      .then(createSuccess(dispatch, navigation.navigate), createFail(dispatch));
+    return (
+      firebase
+        .database()
+        .ref(`/users/${currentUser.uid}/employees`)
+        .push(employee)
+        // Have to put error handler within `.then` due to Firebase idiosyncracity
+        .then(
+          createSuccess(dispatch, navigation.navigate),
+          createFail(dispatch),
+        )
+    );
   }
+  return Promise.reject();
 };
 
 export const editEmployee = (
@@ -180,8 +186,9 @@ const updateSuccess = (
   dispatch(createAction(EmployeeActionType.UPDATE_SUCCESS));
 };
 
-const updateFail = (dispatch: EmployeeDispatch) => () =>
+const updateFail = (dispatch: EmployeeDispatch) => () => {
   dispatch(createAction(EmployeeActionType.UPDATE_FAIL));
+};
 
 export const updateEmployee = (
   { uid, ...employee }: IEmployee<null | string>,
@@ -196,12 +203,13 @@ export const updateEmployee = (
     navigation.navigate("EmployeeList");
   } else {
     dispatch(createAction(EmployeeActionType.UPDATE_START));
-    firebase
+    return firebase
       .database()
       .ref(`/users/${currentUser.uid}/employees/${uid}`)
       .set(employee)
       .then(updateSuccess(dispatch, navigation), updateFail(dispatch));
   }
+  return Promise.reject();
 };
 
 const fireSuccess = (
@@ -232,10 +240,11 @@ export const fireEmployee = (
     navigation.navigate("EmployeeList");
   } else {
     dispatch(createAction(EmployeeActionType.FIRE_START));
-    firebase
+    return firebase
       .database()
       .ref(`/users/${currentUser.uid}/employees/${uid}`)
       .remove()
       .then(fireSuccess(dispatch, navigation), fireFail(dispatch));
   }
+  return Promise.reject();
 };
