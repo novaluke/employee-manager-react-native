@@ -55,9 +55,7 @@ let watchingFunc:
   | ((snapshot: firebase.database.DataSnapshot) => void)
   | undefined;
 
-export const unwatchEmployees = (
-  navigation: NavigationScreenProp<any>,
-) => () => {
+export const unwatchEmployees = (navigation: NavigationScreenProp<any>) => {
   const { currentUser } = firebase.auth();
   if (currentUser === null) {
     navigation.navigate("Auth");
