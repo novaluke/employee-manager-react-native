@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Input renders correctly 1`] = `
+<View
+  style={
+    Object {
+      "alignItems": "center",
+      "flex": 1,
+      "flexDirection": "row",
+      "height": 40,
+    }
+  }
+>
+  <Text
+    style={
+      Object {
+        "flex": 1,
+        "fontSize": 18,
+        "paddingLeft": 20,
+      }
+    }
+  >
+    Enter text here
+  </Text>
+  <TextInput
+    label="Enter text here"
+    style={
+      Object {
+        "borderColor": "#000",
+        "borderWidth": 1,
+        "color": "#000",
+        "flex": 2,
+        "fontSize": 18,
+        "lineHeight": 23,
+        "paddingLeft": 5,
+        "paddingRight": 5,
+      }
+    }
+  />
+</View>
+`;
