@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { StyleSheet, Text } from "react-native";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
@@ -20,6 +21,14 @@ const renderButton = (isLoading: boolean, onSubmit: () => void) => {
   }
   return <Button onPress={onSubmit}>Create</Button>;
 };
+
+const styles = StyleSheet.create({
+  errorTextStyle: {
+    alignSelf: "center",
+    color: "red",
+    fontSize: 20,
+  },
+});
 
 interface IProps extends IFormProps, NavigationScreenProps {
   employeeName: string;
@@ -54,8 +63,13 @@ class CreateEmployee extends Component<IProps> {
     } = this.props;
     return (
       <Card>
-        <EmployeeForm {...this.props} asyncAction={createAction} />
+        <EmployeeForm {...this.props} />
 
+        {createAction.state === "ERROR" && (
+          <CardSection>
+            <Text style={styles.errorTextStyle}>{createAction.error}</Text>
+          </CardSection>
+        )}
         <CardSection>
           {renderButton(createAction.state === "PROGRESS", () =>
             dispatchCreateEmployee(

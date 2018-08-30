@@ -41,7 +41,10 @@ export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
     case EmployeesActionType.EMPLOYEES_FETCHED:
       return {
         ...state,
-        employeesAction: { state: "COMPLETE", value: action.payload.val() },
+        employeesAction: {
+          state: "COMPLETE",
+          value: action.payload.val() || {},
+        },
       };
     default:
       return state;

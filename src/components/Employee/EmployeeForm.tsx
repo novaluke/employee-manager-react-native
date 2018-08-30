@@ -2,7 +2,7 @@ import * as React from "react";
 import { Picker, StyleSheet, Text, View } from "react-native";
 import { connect } from "react-redux";
 
-import { Async, IRootState } from "../../store";
+import { IRootState } from "../../store";
 import {
   FieldUpdatePayload,
   ShiftDay,
@@ -30,7 +30,6 @@ export interface IFormProps {
   phone: string;
   shift: ShiftDay;
   dispatchFieldUpdate: (payload: FieldUpdatePayload) => void;
-  asyncAction: Async<null>;
 }
 
 const Form = ({
@@ -38,7 +37,6 @@ const Form = ({
   phone,
   shift,
   dispatchFieldUpdate,
-  asyncAction,
 }: IFormProps) => {
   const dispatchUpdateName = (value: string) =>
     dispatchFieldUpdate({ value, field: "employeeName" });
@@ -77,12 +75,6 @@ const Form = ({
           ))}
         </Picker>
       </CardSection>
-
-      {asyncAction.state === "ERROR" && (
-        <CardSection>
-          <Text style={styles.errorTextStyle}>{asyncAction.error}</Text>
-        </CardSection>
-      )}
     </View>
   );
 };

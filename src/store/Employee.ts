@@ -15,6 +15,11 @@ export enum EmployeeActionType {
   UPDATE_FAIL = "UPDATE_FAIL",
   EDIT = "EDIT",
   RESET = "RESET",
+  SHOW_MODAL = "SHOW_MODAL",
+  CLOSE_MODAL = "CLOSE_MODAL",
+  FIRE_START = "FIRE_START",
+  FIRE_SUCCESS = "FIRE_SUCCESS",
+  FIRE_FAIL = "FIRE_FAIL",
 }
 
 export enum ShiftDay {
@@ -37,11 +42,15 @@ export interface IEmployee<T extends null | string> {
 export interface IEmployeeState extends IEmployee<null | string> {
   createAction: Async<null>;
   updateAction: Async<null>;
+  fireAction: Async<null>;
+  fireModalShown: boolean;
 }
 
 const INITIAL_STATE: IEmployeeState = {
   createAction: { state: "INIT" },
   employeeName: "",
+  fireAction: { state: "INIT" },
+  fireModalShown: false,
   phone: "",
   shift: ShiftDay.Monday,
   uid: null,
@@ -64,7 +73,12 @@ export type EmployeeAction =
   | { type: EmployeeActionType.UPDATE_SUCCESS }
   | { type: EmployeeActionType.UPDATE_FAIL }
   | { type: EmployeeActionType.EDIT; payload: IEmployee<string> }
-  | { type: EmployeeActionType.RESET };
+  | { type: EmployeeActionType.RESET }
+  | { type: EmployeeActionType.SHOW_MODAL }
+  | { type: EmployeeActionType.CLOSE_MODAL }
+  | { type: EmployeeActionType.FIRE_START }
+  | { type: EmployeeActionType.FIRE_SUCCESS }
+  | { type: EmployeeActionType.FIRE_FAIL };
 
 type EmployeeDispatch = Dispatch<EmployeeAction>;
 
@@ -97,6 +111,23 @@ export const employeeReducer: Reducer<IEmployeeState, EmployeeAction> = (
       return { ...state, ...action.payload };
     case EmployeeActionType.RESET:
       return INITIAL_STATE;
+    case EmployeeActionType.SHOW_MODAL:
+      return { ...state, fireModalShown: true };
+    case EmployeeActionType.CLOSE_MODAL:
+      return { ...state, fireModalShown: false };
+    case EmployeeActionType.FIRE_START:
+      return {
+        ...state,
+        fireAction: { state: "PROGRESS" },
+        fireModalShown: false,
+      };
+    case EmployeeActionType.FIRE_SUCCESS:
+      return INITIAL_STATE;
+    case EmployeeActionType.FIRE_FAIL:
+      return {
+        ...state,
+        fireAction: { state: "ERROR", error: "Something went wrong!" },
+      };
     default:
       return state;
   }
@@ -170,5 +201,41 @@ export const updateEmployee = (
       .ref(`/users/${currentUser.uid}/employees/${uid}`)
       .set(employee)
       .then(updateSuccess(dispatch, navigation), updateFail(dispatch));
+  }
+};
+
+const fireSuccess = (
+  dispatch: EmployeeDispatch,
+  navigation: NavigationScreenProp<any>,
+) => () => {
+  navigation.navigate("EmployeeList");
+  dispatch(createAction(EmployeeActionType.FIRE_SUCCESS));
+};
+
+const fireFail = (dispatch: EmployeeDispatch) => () =>
+  dispatch(createAction(EmployeeActionType.FIRE_FAIL));
+
+export const showFireModal = () => createAction(EmployeeActionType.SHOW_MODAL);
+export const closeFireModal = () =>
+  createAction(EmployeeActionType.CLOSE_MODAL);
+
+export const fireEmployee = (
+  uid: string | null,
+  navigation: NavigationScreenProp<any>,
+) => (dispatch: EmployeeDispatch) => {
+  const { currentUser } = firebase.auth();
+  if (currentUser === null) {
+    navigation.navigate("Auth");
+  } else if (uid === null) {
+    // TODO handle this better, either by making it impossible to get here (via
+    // type safety) or showing an error message at least
+    navigation.navigate("EmployeeList");
+  } else {
+    dispatch(createAction(EmployeeActionType.FIRE_START));
+    firebase
+      .database()
+      .ref(`/users/${currentUser.uid}/employees/${uid}`)
+      .remove()
+      .then(fireSuccess(dispatch, navigation), fireFail(dispatch));
   }
 };
