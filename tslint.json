@@ -9,13 +9,14 @@
   ],
   "jsRules": {},
   "rules": {
-    "variable-name": [true, "ban-keywrods", "check-format", "allow-pascal-case"],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case"],
     "import-name": [true, {
       "react": "React"
     }],
     "jsx-boolean-value": false,
     "no-unused-expression": true,
-    "no-unused-variable": true
+    "no-unused-variable": true,
+    "object-literal-sort-keys": [true, "shorthand-first"]
   },
   "rulesDirectory": [],
   "linterOptions": {

@@ -30,6 +30,7 @@ module.exports = {
       // since TypeScript will check anyway
       "no-undef": "off",
       "no-unused-vars": "off",
+      "no-use-before-define": "off",
     }
   }]
 };
