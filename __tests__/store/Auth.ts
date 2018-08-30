@@ -1,5 +1,4 @@
 import "jest-enzyme";
-import React from "react";
 
 import firebase from "firebase";
 import { NavigationScreenProp } from "react-navigation";
@@ -11,13 +10,14 @@ import {
   AuthActionType,
   authReducer as reducer,
   emailChanged,
+  IAuthState,
   INITIAL_STATE,
   logIn,
   passwordChanged,
 } from "../../src/store/Auth";
 
 describe("reducer", () => {
-  const testState = {
+  const testState: IAuthState = {
     email: "user@website.com",
     loginAction: { state: "PROGRESS" } as Async<any>,
     password: "supersecure",
@@ -34,21 +34,27 @@ describe("reducer", () => {
   });
 
   it("updates the email when it is changed", () => {
-    const email = "user@website.com";
+    const newEmail = "example@website.com";
+    expect(newEmail).not.toEqual(testState.email);
+
     const state = reducer(testState, {
-      payload: email,
+      payload: newEmail,
       type: AuthActionType.EMAIL_CHANGED,
     });
-    expect(state).toEqual({ ...testState, email });
+
+    expect(state).toEqual({ ...testState, email: newEmail });
   });
 
   it("updates the password when it is changed", () => {
-    const password = "supersecure";
+    const newPassword = "mypassword";
+    expect(newPassword).not.toEqual(testState.password);
+
     const state = reducer(testState, {
-      payload: password,
+      payload: newPassword,
       type: AuthActionType.PASSWORD_CHANGED,
     });
-    expect(state).toEqual({ ...testState, password });
+
+    expect(state).toEqual({ ...testState, password: newPassword });
   });
 
   describe("login flow", () => {
@@ -75,13 +81,7 @@ describe("reducer", () => {
       });
 
       it("resets the rest of the state", () => {
-        const prevState = {
-          email: "foo@bar.com",
-          loginAction: { state: "ERROR", error: "" } as Async<any>,
-          password: "notsecure",
-          user: null,
-        };
-        const state = reducer(prevState, {
+        const state = reducer(testState, {
           payload: {} as firebase.auth.UserCredential,
           type: AuthActionType.LOGIN_SUCCESS,
         });
@@ -106,9 +106,16 @@ describe("reducer", () => {
         const state = reducer(testState, {
           type: AuthActionType.LOGIN_FAIL,
         });
-        // TODO figure out how to make the type system happy here without
-        // confusing verbosity
-        expect(state.loginAction.error).toMatchSnapshot();
+
+        // Can't just expect on loginAction.error since not all AsyncActions
+        // include that property (typechecking will fail). First fail if it's
+        // not an error, then also fail if it is an error (ensuring the type
+        // includes `.error`) but doesn't match the expectation. Thus all bases
+        // are covered.
+        expect(state.loginAction.state).toEqual("ERROR");
+        if (state.loginAction.state === "ERROR") {
+          expect(state.loginAction.error).toMatchSnapshot();
+        }
       });
     });
   });
@@ -135,17 +142,16 @@ describe("action creators", () => {
   });
 
   describe("logIn", () => {
+    const authReturn: Partial<firebase.auth.Auth> = {};
     let navigation: NavigationScreenProp<any>;
     beforeEach(() => {
       navigation = stubNavigation();
+      (firebase.auth as any).mockImplementation(() => authReturn);
     });
 
     it("first dispatches the login request started action", () => {
-      const signInMock = jest.fn(() => new Promise(() => {}));
-      firebase.auth.mockImplementation(() => ({
-        signInWithEmailAndPassword: signInMock,
-      }));
-
+      const signInMock = jest.fn(() => new Promise(() => ({})));
+      authReturn.signInWithEmailAndPassword = signInMock;
       const dispatch = jest.fn();
 
       logIn("", "", navigation)(dispatch);
@@ -159,9 +165,7 @@ describe("action creators", () => {
       const email = "user@example.com";
       const password = "mypassword";
       const signInMock = jest.fn(() => Promise.resolve());
-      firebase.auth.mockImplementation(() => ({
-        signInWithEmailAndPassword: signInMock,
-      }));
+      authReturn.signInWithEmailAndPassword = signInMock;
 
       return logIn(email, password, navigation)(jest.fn()).then(() => {
         expect(signInMock).toHaveBeenCalledTimes(1);
@@ -175,10 +179,8 @@ describe("action creators", () => {
         const password = "mypassword";
         const signUpMock = jest.fn(() => Promise.resolve());
         const signInPromise = Promise.reject();
-        firebase.auth.mockImplementation(() => ({
-          createUserWithEmailAndPassword: signUpMock,
-          signInWithEmailAndPassword: jest.fn(() => signInPromise),
-        }));
+        authReturn.createUserWithEmailAndPassword = signUpMock;
+        authReturn.signInWithEmailAndPassword = jest.fn(() => signInPromise);
 
         return logIn(email, password, navigation)(jest.fn()).then(() => {
           expect(signUpMock).toHaveBeenCalledTimes(1);
@@ -189,10 +191,12 @@ describe("action creators", () => {
       describe("and automatic user creation fails", () => {
         it("dispatches the login failure action", () => {
           const dispatch = jest.fn();
-          firebase.auth.mockImplementation(() => ({
-            createUserWithEmailAndPassword: jest.fn(() => Promise.reject()),
-            signInWithEmailAndPassword: jest.fn(() => Promise.reject()),
-          }));
+          authReturn.createUserWithEmailAndPassword = jest.fn(() =>
+            Promise.reject(),
+          );
+          authReturn.signInWithEmailAndPassword = jest.fn(() =>
+            Promise.reject(),
+          );
 
           return logIn("", "", navigation)(dispatch).then(() => {
             expect(dispatch).toHaveBeenCalledWith({
@@ -206,12 +210,12 @@ describe("action creators", () => {
         it("dispatches the user logged in action with the user as payload", () => {
           const user = {};
           const dispatch = jest.fn();
-          firebase.auth.mockImplementation(() => ({
-            createUserWithEmailAndPassword: jest.fn(() =>
-              Promise.resolve(user),
-            ),
-            signInWithEmailAndPassword: jest.fn(() => Promise.reject()),
-          }));
+          authReturn.createUserWithEmailAndPassword = jest.fn(() =>
+            Promise.resolve(user),
+          );
+          authReturn.signInWithEmailAndPassword = jest.fn(() =>
+            Promise.reject(),
+          );
 
           return logIn("", "", navigation)(dispatch).then(() => {
             expect(dispatch).toHaveBeenCalledWith({
@@ -222,10 +226,12 @@ describe("action creators", () => {
         });
 
         it("redirects to the main navigation stack", () => {
-          firebase.auth.mockImplementation(() => ({
-            createUserWithEmailAndPassword: jest.fn(() => Promise.resolve()),
-            signInWithEmailAndPassword: jest.fn(() => Promise.reject()),
-          }));
+          authReturn.createUserWithEmailAndPassword = jest.fn(() =>
+            Promise.resolve(),
+          );
+          authReturn.signInWithEmailAndPassword = jest.fn(() =>
+            Promise.reject(),
+          );
           expect(navigation.navigate).not.toHaveBeenCalled();
 
           return logIn("", "", navigation)(jest.fn()).then(() => {
@@ -235,13 +241,14 @@ describe("action creators", () => {
         });
       });
     });
+
     describe("when login succeeds", () => {
       it("dispatches the user logged in action with the user as payload", () => {
         const user = {};
         const dispatch = jest.fn();
-        firebase.auth.mockImplementation(() => ({
-          signInWithEmailAndPassword: jest.fn(() => Promise.resolve(user)),
-        }));
+        authReturn.signInWithEmailAndPassword = jest.fn(() =>
+          Promise.resolve(user),
+        );
 
         return logIn("", "", navigation)(dispatch).then(() => {
           expect(dispatch).toHaveBeenCalledWith({
@@ -253,9 +260,9 @@ describe("action creators", () => {
 
       it("redirects to the main navigation stack", () => {
         const user = {};
-        firebase.auth.mockImplementation(() => ({
-          signInWithEmailAndPassword: jest.fn(() => Promise.resolve(user)),
-        }));
+        authReturn.signInWithEmailAndPassword = jest.fn(() =>
+          Promise.resolve(user),
+        );
         expect(navigation.navigate).not.toHaveBeenCalled();
 
         return logIn("", "", navigation)(jest.fn()).then(() => {
