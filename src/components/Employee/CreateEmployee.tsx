@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { StyleSheet, Text } from "react-native";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
@@ -11,24 +10,8 @@ import {
   ShiftDay,
   updateField,
 } from "../../store/Employee";
-import { Button, Card, CardSection, Spinner, SpinnerSize } from "../common";
+import { AsyncButton, Card, CardSection } from "../common";
 import EmployeeForm, { IFormProps } from "./EmployeeForm";
-
-// TODO extract into a reusable component
-const renderButton = (isLoading: boolean, onSubmit: () => void) => {
-  if (isLoading) {
-    return <Spinner size={SpinnerSize.Large} />;
-  }
-  return <Button onPress={onSubmit}>Create</Button>;
-};
-
-const styles = StyleSheet.create({
-  errorTextStyle: {
-    alignSelf: "center",
-    color: "red",
-    fontSize: 20,
-  },
-});
 
 interface IProps extends IFormProps, NavigationScreenProps {
   employeeName: string;
@@ -61,27 +44,26 @@ class CreateEmployee extends Component<IProps> {
       createAction,
       navigation,
     } = this.props;
+    const onCreateEmployee = () =>
+      dispatchCreateEmployee(
+        {
+          employeeName,
+          phone,
+          shift,
+          uid: null,
+        },
+        navigation,
+      );
     return (
       <Card>
         <EmployeeForm {...this.props} />
 
-        {createAction.state === "ERROR" && (
-          <CardSection>
-            <Text style={styles.errorTextStyle}>{createAction.error}</Text>
-          </CardSection>
-        )}
         <CardSection>
-          {renderButton(createAction.state === "PROGRESS", () =>
-            dispatchCreateEmployee(
-              {
-                employeeName,
-                phone,
-                shift,
-                uid: null,
-              },
-              navigation,
-            ),
-          )}
+          <AsyncButton
+            label="Create"
+            asyncAction={createAction}
+            onPress={onCreateEmployee}
+          />
         </CardSection>
       </Card>
     );

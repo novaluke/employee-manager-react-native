@@ -1,35 +1,11 @@
 import React from "react";
-import { StyleSheet, Text } from "react-native";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
 import { Async, IRootState } from "../store";
 import { emailChanged, logIn, passwordChanged } from "../store/Auth";
 
-import {
-  Button,
-  Card,
-  CardSection,
-  Input,
-  Spinner,
-  SpinnerSize,
-} from "./common";
-
-const renderButton = (isLoading: boolean, onSubmit: () => void) => {
-  if (isLoading) {
-    return <Spinner size={SpinnerSize.Large} />;
-  }
-
-  return <Button onPress={onSubmit}>Log in</Button>;
-};
-
-const styles = StyleSheet.create({
-  errorTextStyle: {
-    alignSelf: "center",
-    color: "red",
-    fontSize: 20,
-  },
-});
+import { AsyncButton, Card, CardSection, Input } from "./common";
 
 interface IProps extends NavigationScreenProps {
   email: string;
@@ -45,7 +21,6 @@ interface IProps extends NavigationScreenProps {
 }
 
 const LoginForm: React.SFC<IProps> = props => {
-  const { errorTextStyle } = styles;
   const {
     email,
     password,
@@ -55,6 +30,7 @@ const LoginForm: React.SFC<IProps> = props => {
     dispatchLogIn,
     navigation,
   } = props;
+  const onLogIn = () => dispatchLogIn(email, password, navigation);
   return (
     <Card>
       <CardSection>
@@ -77,16 +53,12 @@ const LoginForm: React.SFC<IProps> = props => {
         />
       </CardSection>
 
-      {loginAction.state === "ERROR" && (
-        <CardSection>
-          <Text style={errorTextStyle}>{loginAction.error}</Text>
-        </CardSection>
-      )}
-
       <CardSection>
-        {renderButton(loginAction.state === "PROGRESS", () =>
-          dispatchLogIn(email, password, navigation),
-        )}
+        <AsyncButton
+          label="Log in"
+          asyncAction={loginAction}
+          onPress={onLogIn}
+        />
       </CardSection>
     </Card>
   );

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView } from "react-native";
 import reactNativeCommunications from "react-native-communications";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
@@ -15,23 +15,8 @@ import {
   updateEmployee,
   updateField,
 } from "../../store/Employee";
-import {
-  Button,
-  Card,
-  CardSection,
-  Confirm,
-  Spinner,
-  SpinnerSize,
-} from "../common";
+import { AsyncButton, Button, Card, CardSection, Confirm } from "../common";
 import EmployeeForm, { IFormProps } from "./EmployeeForm";
-
-const styles = StyleSheet.create({
-  errorTextStyle: {
-    alignSelf: "center",
-    color: "red",
-    fontSize: 20,
-  },
-});
 
 interface IProps extends IFormProps, NavigationScreenProps {
   employeeName: string;
@@ -53,18 +38,6 @@ interface IProps extends IFormProps, NavigationScreenProps {
     navigation: NavigationScreenProp<any>,
   ) => void;
 }
-
-const renderButton = (
-  label: string,
-  isLoading: boolean,
-  onSubmit: () => void,
-  size: SpinnerSize = SpinnerSize.Large,
-) => {
-  if (isLoading) {
-    return <Spinner size={size} />;
-  }
-  return <Button onPress={onSubmit}>{label}</Button>;
-};
 
 const textSchedule = (phone: string, shift: ShiftDay) => () =>
   reactNativeCommunications.text(phone, `Your upcoming shift is on ${shift}`);
@@ -98,47 +71,40 @@ class EditEmployee extends Component<IProps> {
       dispatchFireEmployee,
       navigation,
     } = this.props;
-    const { errorTextStyle } = styles;
     const onFireEmployee = () => dispatchFireEmployee(uid, navigation);
+    const onUpdateEmployee = () =>
+      dispatchUpdateEmployee(
+        {
+          employeeName,
+          phone,
+          shift,
+          uid,
+        },
+        navigation,
+      );
     return (
       <ScrollView>
         <Card>
           <EmployeeForm {...this.props} />
 
-          {updateAction.state === "ERROR" && (
-            <CardSection>
-              <Text style={errorTextStyle}>{updateAction.error}</Text>
-            </CardSection>
-          )}
           <CardSection>
-            {renderButton("Save", updateAction.state === "PROGRESS", () =>
-              dispatchUpdateEmployee(
-                {
-                  employeeName,
-                  phone,
-                  shift,
-                  uid,
-                },
-                navigation,
-              ),
-            )}
+            <AsyncButton
+              label="Save"
+              asyncAction={updateAction}
+              onPress={onUpdateEmployee}
+            />
           </CardSection>
 
           <CardSection>
             <Button onPress={textSchedule(phone, shift)}>Text schedule</Button>
           </CardSection>
 
-          {fireAction.state === "ERROR" && (
-            <CardSection>
-              <Text style={errorTextStyle}>{fireAction.error}</Text>
-            </CardSection>
-          )}
           <CardSection>
-            {renderButton(
-              "Fire",
-              fireAction.state === "PROGRESS",
-              dispatchShowFireModal,
-            )}
+            <AsyncButton
+              label="Fire"
+              asyncAction={fireAction}
+              onPress={dispatchShowFireModal}
+            />
           </CardSection>
           <Confirm
             text={`Are you sure you want to fire ${employeeName}?`}
