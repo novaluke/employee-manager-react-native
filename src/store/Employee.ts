@@ -8,6 +8,9 @@ export enum EmployeeActionType {
   CREATE_START = "CREATE_START",
   CREATE_SUCCESS = "CREATE_SUCCESS",
   CREATE_FAIL = "CREATE_FAIL",
+  UPDATE_START = "UPDATE_START",
+  UPDATE_SUCCESS = "UPDATE_SUCCESS",
+  UPDATE_FAIL = "UPDATE_FAIL",
   EDIT = "EDIT",
   RESET = "RESET",
 }
@@ -55,6 +58,9 @@ export type EmployeeAction =
   | { type: EmployeeActionType.CREATE_START }
   | { type: EmployeeActionType.CREATE_SUCCESS }
   | { type: EmployeeActionType.CREATE_FAIL }
+  | { type: EmployeeActionType.UPDATE_START }
+  | { type: EmployeeActionType.UPDATE_SUCCESS }
+  | { type: EmployeeActionType.UPDATE_FAIL }
   | { type: EmployeeActionType.EDIT; payload: IEmployee<string> }
   | { type: EmployeeActionType.RESET };
 
@@ -72,6 +78,14 @@ export const employeeReducer: Reducer<IEmployeeState, EmployeeAction> = (
     case EmployeeActionType.CREATE_SUCCESS:
       return INITIAL_STATE;
     case EmployeeActionType.CREATE_FAIL:
+      return { ...state, error: "Something went wrong!", loading: false };
+    // TODO split out loading and error states for each action so eg. update and
+    // delete progress/failure can be shown separately
+    case EmployeeActionType.UPDATE_START:
+      return { ...state, loading: true };
+    case EmployeeActionType.UPDATE_SUCCESS:
+      return INITIAL_STATE;
+    case EmployeeActionType.UPDATE_FAIL:
       return { ...state, error: "Something went wrong!", loading: false };
     case EmployeeActionType.EDIT:
       return { ...state, ...action.payload };
@@ -116,7 +130,39 @@ export const editEmployee = (
   employee: IEmployee<string>,
 ) => (dispatch: EmployeeDispatch) => {
   dispatch(createAction(EmployeeActionType.EDIT, employee));
-  navigation.navigate("CreateEmployee");
+  navigation.navigate("EditEmployee", { employeeName: employee.employeeName });
 };
 
 export const resetForm = () => createAction(EmployeeActionType.RESET);
+
+const updateSuccess = (
+  dispatch: EmployeeDispatch,
+  navigation: NavigationScreenProp<any>,
+) => () => {
+  navigation.navigate("EmployeeList");
+  dispatch(createAction(EmployeeActionType.UPDATE_SUCCESS));
+};
+
+const updateFail = (dispatch: EmployeeDispatch) => () =>
+  dispatch(createAction(EmployeeActionType.UPDATE_FAIL));
+
+export const updateEmployee = (
+  { uid, ...employee }: IEmployee<null | string>,
+  navigation: NavigationScreenProp<any>,
+) => (dispatch: EmployeeDispatch) => {
+  const { currentUser } = firebase.auth();
+  if (currentUser === null) {
+    navigation.navigate("Auth");
+  } else if (uid === null) {
+    // TODO handle this better, either by making it impossible to get here (via
+    // type safety) or showing an error message at least
+    navigation.navigate("EmployeeList");
+  } else {
+    dispatch(createAction(EmployeeActionType.UPDATE_START));
+    firebase
+      .database()
+      .ref(`/users/${currentUser.uid}/employees/${uid}`)
+      .set(employee)
+      .then(updateSuccess(dispatch, navigation), updateFail(dispatch));
+  }
+};

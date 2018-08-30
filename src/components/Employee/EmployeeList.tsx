@@ -9,11 +9,11 @@ import {
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { IRootState } from "../store";
-import { editEmployee, IEmployee } from "../store/Employee";
-import { unwatchEmployees, watchEmployees } from "../store/Employees";
+import { IRootState } from "../../store";
+import { editEmployee, IEmployee } from "../../store/Employee";
+import { unwatchEmployees, watchEmployees } from "../../store/Employees";
 
-import { CardSection, Spinner, SpinnerSize } from "./common";
+import { CardSection, Spinner, SpinnerSize } from "../common";
 
 const addEmployee = (navigation: NavigationScreenProp<any>) => () =>
   navigation.navigate("CreateEmployee");
@@ -80,7 +80,7 @@ class EmployeeList extends Component<IProps> {
     const { loading, employees } = this.props;
     return (
       <View>
-        {loading === true && <Spinner size={SpinnerSize.Large} />}
+        {loading && <Spinner size={SpinnerSize.Large} />}
         <FlatList
           data={Object.keys(employees).map((uid: string) => ({
             uid,
@@ -109,5 +109,3 @@ export default connect(
     dispatchWatchEmployees: watchEmployees,
   },
 )(EmployeeList);
-
-// export default EmployeeList;
