@@ -66,6 +66,10 @@
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|react-navigation)"
     ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules",
+      "<rootDir>/__tests__/helpers"
+    ],
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",
