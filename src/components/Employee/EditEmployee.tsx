@@ -3,7 +3,7 @@ import reactNativeCommunications from "react-native-communications";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { IRootState } from "../../store";
+import { Async, IRootState } from "../../store";
 import {
   IEmployee,
   resetForm,
@@ -16,10 +16,10 @@ import EmployeeForm, { IFormProps } from "./EmployeeForm";
 
 interface IProps extends IFormProps, NavigationScreenProps {
   employeeName: string;
-  loading: boolean;
   phone: string;
   shift: ShiftDay;
   uid: string | null;
+  updateAction: Async<null>;
   dispatchUpdateEmployee: (
     employee: IEmployee<string | null>,
     navigation: NavigationScreenProp<any>,
@@ -57,16 +57,16 @@ class EditEmployee extends Component<IProps> {
       phone,
       shift,
       uid,
+      updateAction,
       dispatchUpdateEmployee,
-      loading,
       navigation,
     } = this.props;
     return (
       <Card>
-        <EmployeeForm {...this.props} />
+        <EmployeeForm {...this.props} asyncAction={updateAction} />
 
         <CardSection>
-          {renderButton(loading, () =>
+          {renderButton(updateAction.state === "PROGRESS", () =>
             dispatchUpdateEmployee(
               {
                 employeeName,
@@ -88,14 +88,13 @@ class EditEmployee extends Component<IProps> {
 }
 
 const mapStateToProps = (state: IRootState) => {
-  const { employeeName, phone, shift, uid, loading, error } = state.employee;
+  const { employeeName, phone, shift, uid, updateAction } = state.employee;
   return {
     employeeName,
-    error,
-    loading,
     phone,
     shift,
     uid,
+    updateAction,
   };
 };
 

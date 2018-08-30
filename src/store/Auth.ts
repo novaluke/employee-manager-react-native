@@ -3,6 +3,8 @@ import { NavigationScreenProp } from "react-navigation";
 import { Dispatch, Reducer } from "redux";
 import { action as createAction } from "typesafe-actions";
 
+import { Async } from "./common";
+
 export enum AuthActionType {
   EMAIL_CHANGED = "EMAIL_CHANGED",
   PASSWORD_CHANGED = "PASSWORD_CHANGED",
@@ -14,15 +16,13 @@ export enum AuthActionType {
 export interface IAuthState {
   email: string;
   password: string;
-  loading: boolean;
-  error: string;
+  loginAction: Async<null>;
   user: firebase.auth.UserCredential | null;
 }
 
 const INITIAL_STATE: IAuthState = {
   email: "",
-  error: "",
-  loading: false,
+  loginAction: { state: "INIT" },
   password: "",
   user: null,
 };
@@ -49,11 +49,14 @@ export const authReducer: Reducer<IAuthState, AuthAction> = (
     case AuthActionType.PASSWORD_CHANGED:
       return { ...state, password: action.payload };
     case AuthActionType.LOGIN_START:
-      return { ...state, loading: true, error: "" };
+      return { ...state, loginAction: { state: "PROGRESS" } };
     case AuthActionType.LOGIN_SUCCESS:
       return { ...state, ...INITIAL_STATE, user: action.payload };
     case AuthActionType.LOGIN_FAIL:
-      return { ...state, loading: false, error: "Something went wrong!" };
+      return {
+        ...state,
+        loginAction: { state: "ERROR", error: "Something went wrong!" },
+      };
     default:
       return state;
   }

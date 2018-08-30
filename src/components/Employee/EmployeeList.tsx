@@ -9,7 +9,7 @@ import {
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { IRootState } from "../../store";
+import { Async, IRootState } from "../../store";
 import { editEmployee, IEmployee } from "../../store/Employee";
 import { unwatchEmployees, watchEmployees } from "../../store/Employees";
 
@@ -31,8 +31,7 @@ const styles = StyleSheet.create({
 interface IProps extends NavigationScreenProps {
   dispatchWatchEmployees: (navigation: NavigationScreenProp<any>) => void;
   dispatchEditEmployee: any;
-  employees: { [uid: string]: IEmployee<string> };
-  loading: boolean;
+  employeesAction: Async<{ [uid: string]: IEmployee<string> }>;
 }
 
 class EmployeeList extends Component<IProps> {
@@ -77,28 +76,31 @@ class EmployeeList extends Component<IProps> {
   };
 
   public render() {
-    const { loading, employees } = this.props;
+    const { employeesAction } = this.props;
     return (
       <View>
-        {loading && <Spinner size={SpinnerSize.Large} />}
-        <FlatList
-          data={Object.keys(employees).map((uid: string) => ({
-            uid,
-            key: uid, // For React element list indexing
-            ...employees[uid],
-          }))}
-          renderItem={this.renderEmployee}
-        />
+        {employeesAction.state === "PROGRESS" && (
+          <Spinner size={SpinnerSize.Large} />
+        )}
+        {employeesAction.state === "COMPLETE" && (
+          <FlatList
+            data={Object.keys(employeesAction.value).map((uid: string) => ({
+              uid,
+              key: uid, // For React element list indexing
+              ...employeesAction.value[uid],
+            }))}
+            renderItem={this.renderEmployee}
+          />
+        )}
       </View>
     );
   }
 }
 
 const mapStateToProps = (state: IRootState) => {
-  const { loading, employees } = state.employees;
+  const { employeesAction } = state.employees;
   return {
-    employees,
-    loading,
+    employeesAction,
   };
 };
 

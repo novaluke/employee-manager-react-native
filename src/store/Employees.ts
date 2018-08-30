@@ -3,6 +3,7 @@ import { NavigationScreenProp } from "react-navigation";
 import { Dispatch, Reducer } from "redux";
 import { action as createAction } from "typesafe-actions";
 
+import { Async } from "./common";
 import { IEmployee } from "./Employee";
 
 export enum EmployeesActionType {
@@ -21,13 +22,11 @@ export type EmployeesAction =
 type EmployeesDispatch = Dispatch<EmployeesAction>;
 
 export interface IEmployeesState {
-  loading: boolean;
-  employees: { [uid: string]: IEmployee<string> };
+  employeesAction: Async<{ [uid: string]: IEmployee<string> }>;
 }
 
 const INITIAL_STATE: IEmployeesState = {
-  employees: {},
-  loading: false,
+  employeesAction: { state: "INIT" },
 };
 
 export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
@@ -36,11 +35,14 @@ export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
 ) => {
   switch (action.type) {
     case EmployeesActionType.WATCH_START:
-      return { ...state, loading: true }; // TODO set loading flag
+      return { ...state, employeesAction: { state: "PROGRESS" } };
     case EmployeesActionType.WATCH_END:
       return state;
     case EmployeesActionType.EMPLOYEES_FETCHED:
-      return { ...state, loading: false, employees: action.payload.val() };
+      return {
+        ...state,
+        employeesAction: { state: "COMPLETE", value: action.payload.val() },
+      };
     default:
       return state;
   }

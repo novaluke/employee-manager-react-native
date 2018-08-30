@@ -3,7 +3,7 @@ import { StyleSheet, Text } from "react-native";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { IRootState } from "../store";
+import { Async, IRootState } from "../store";
 import { emailChanged, logIn, passwordChanged } from "../store/Auth";
 
 import {
@@ -40,8 +40,7 @@ interface IProps extends NavigationScreenProps {
     password: string,
     navigation: NavigationScreenProp<any>,
   ) => void;
-  error: string;
-  loading: boolean;
+  loginAction: Async<null>;
   dispatchEmailChanged: (email: string) => void;
 }
 
@@ -50,11 +49,10 @@ const LoginForm: React.SFC<IProps> = props => {
   const {
     email,
     password,
+    loginAction,
     dispatchEmailChanged,
     dispatchPasswordChanged,
     dispatchLogIn,
-    error,
-    loading,
     navigation,
   } = props;
   return (
@@ -79,14 +77,14 @@ const LoginForm: React.SFC<IProps> = props => {
         />
       </CardSection>
 
-      {error !== "" && (
+      {loginAction.state === "ERROR" && (
         <CardSection>
-          <Text style={errorTextStyle}>{error}</Text>
+          <Text style={errorTextStyle}>{loginAction.error}</Text>
         </CardSection>
       )}
 
       <CardSection>
-        {renderButton(loading, () =>
+        {renderButton(loginAction.state === "PROGRESS", () =>
           dispatchLogIn(email, password, navigation),
         )}
       </CardSection>
@@ -95,11 +93,10 @@ const LoginForm: React.SFC<IProps> = props => {
 };
 
 const mapStateToProps = (state: IRootState) => {
-  const { email, password, loading, error } = state.auth;
+  const { email, password, loginAction } = state.auth;
   return {
     email,
-    error,
-    loading,
+    loginAction,
     password,
   };
 };

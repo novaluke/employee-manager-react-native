@@ -3,6 +3,8 @@ import { NavigationScreenProp } from "react-navigation";
 import { Dispatch, Reducer } from "redux";
 import { action as createAction } from "typesafe-actions";
 
+import { Async } from "./common";
+
 export enum EmployeeActionType {
   UPDATE_FIELD = "UPDATE_FIELD",
   CREATE_START = "CREATE_START",
@@ -33,17 +35,17 @@ export interface IEmployee<T extends null | string> {
 }
 
 export interface IEmployeeState extends IEmployee<null | string> {
-  error: string;
-  loading: boolean;
+  createAction: Async<null>;
+  updateAction: Async<null>;
 }
 
 const INITIAL_STATE: IEmployeeState = {
+  createAction: { state: "INIT" },
   employeeName: "",
-  error: "",
-  loading: false,
   phone: "",
   shift: ShiftDay.Monday,
   uid: null,
+  updateAction: { state: "INIT" },
 };
 
 export type FieldUpdatePayload =
@@ -74,19 +76,23 @@ export const employeeReducer: Reducer<IEmployeeState, EmployeeAction> = (
     case EmployeeActionType.UPDATE_FIELD:
       return { ...state, [action.payload.field]: action.payload.value };
     case EmployeeActionType.CREATE_START:
-      return { ...state, loading: true };
+      return { ...state, createAction: { state: "PROGRESS" } };
     case EmployeeActionType.CREATE_SUCCESS:
       return INITIAL_STATE;
     case EmployeeActionType.CREATE_FAIL:
-      return { ...state, error: "Something went wrong!", loading: false };
-    // TODO split out loading and error states for each action so eg. update and
-    // delete progress/failure can be shown separately
+      return {
+        ...state,
+        createAction: { state: "ERROR", error: "Something went wrong!" },
+      };
     case EmployeeActionType.UPDATE_START:
-      return { ...state, loading: true };
+      return { ...state, updateAction: { state: "PROGRESS" } };
     case EmployeeActionType.UPDATE_SUCCESS:
       return INITIAL_STATE;
     case EmployeeActionType.UPDATE_FAIL:
-      return { ...state, error: "Something went wrong!", loading: false };
+      return {
+        ...state,
+        updateAction: { state: "ERROR", error: "Something went wrong!" },
+      };
     case EmployeeActionType.EDIT:
       return { ...state, ...action.payload };
     case EmployeeActionType.RESET:

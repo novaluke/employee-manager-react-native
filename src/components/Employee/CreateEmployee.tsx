@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { IRootState } from "../../store";
+import { Async, IRootState } from "../../store";
 import {
   createEmployee,
   IEmployee,
@@ -23,9 +23,9 @@ const renderButton = (isLoading: boolean, onSubmit: () => void) => {
 
 interface IProps extends IFormProps, NavigationScreenProps {
   employeeName: string;
-  loading: boolean;
   phone: string;
   shift: ShiftDay;
+  createAction: Async<null>;
   dispatchCreateEmployee: (
     employee: IEmployee<null>,
     navigation: NavigationScreenProp<any>,
@@ -49,15 +49,15 @@ class CreateEmployee extends Component<IProps> {
       phone,
       shift,
       dispatchCreateEmployee,
-      loading,
+      createAction,
       navigation,
     } = this.props;
     return (
       <Card>
-        <EmployeeForm {...this.props} />
+        <EmployeeForm {...this.props} asyncAction={createAction} />
 
         <CardSection>
-          {renderButton(loading, () =>
+          {renderButton(createAction.state === "PROGRESS", () =>
             dispatchCreateEmployee(
               {
                 employeeName,
@@ -75,11 +75,10 @@ class CreateEmployee extends Component<IProps> {
 }
 
 const mapStateToProps = (state: IRootState) => {
-  const { employeeName, phone, shift, loading, error } = state.employee;
+  const { employeeName, phone, shift, createAction } = state.employee;
   return {
+    createAction,
     employeeName,
-    error,
-    loading,
     phone,
     shift,
   };
