@@ -22,4 +22,4 @@ CardSection.propTypes = {
   children: PropTypes.node.isRequired
 };
 
-export { CardSection };
+export default CardSection;

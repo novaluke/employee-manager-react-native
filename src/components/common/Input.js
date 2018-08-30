@@ -54,4 +54,4 @@ Input.defaultProps = {
   placeholder: ""
 };
 
-export { Input };
+export default Input;

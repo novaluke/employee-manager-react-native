@@ -28,4 +28,4 @@ Header.propTypes = {
   headerText: PropTypes.string.isRequired
 };
 
-export { Header };
+export default Header;

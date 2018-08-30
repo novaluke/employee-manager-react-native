@@ -37,4 +37,4 @@ Button.propTypes = {
   children: PropTypes.node.isRequired
 };
 
-export { Button };
+export default Button;

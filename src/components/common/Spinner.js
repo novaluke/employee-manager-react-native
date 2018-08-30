@@ -27,4 +27,4 @@ Spinner.defaultProps = {
   size: "large"
 };
 
-export { Spinner };
+export default Spinner;
