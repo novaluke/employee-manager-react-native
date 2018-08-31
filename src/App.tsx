@@ -33,14 +33,23 @@ const RootNavigator = createSwitchNavigator(
   { initialRouteName: "Initializing" },
 );
 
-firebase.initializeApp(firebaseConfigJson);
+class App extends React.Component {
+  public constructor(props: {}) {
+    super(props);
+    if (firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfigJson);
+    }
+  }
 
-const App: React.SFC = () => (
-  <Provider store={store}>
-    <View style={{ flex: 1 }}>
-      <RootNavigator />
-    </View>
-  </Provider>
-);
+  public render() {
+    return (
+      <Provider store={store}>
+        <View style={{ flex: 1 }}>
+          <RootNavigator />
+        </View>
+      </Provider>
+    );
+  }
+}
 
 export default App;
