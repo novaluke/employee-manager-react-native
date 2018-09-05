@@ -118,6 +118,22 @@ describe("Employees actions", () => {
           });
         });
       });
+
+      describe("when data is available immediately", () => {
+        it("dispatches the watch start action before the 'data fetched' action", () => {
+          const dispatch = jest.fn();
+          on.mockImplementation((_, callback) => callback({}));
+
+          watchEmployees(navigation)(dispatch);
+
+          expect(dispatch.mock.calls[0][0].type).toBe(
+            EmployeesActionType.WATCH_START,
+          );
+          expect(dispatch.mock.calls[1][0].type).toBe(
+            EmployeesActionType.EMPLOYEES_FETCHED,
+          );
+        });
+      });
     });
   });
 
