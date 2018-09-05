@@ -1,10 +1,7 @@
 import firebase from "firebase";
 import { NavigationScreenProp } from "react-navigation";
-import { Dispatch, Reducer } from "redux";
+import { Dispatch } from "redux";
 import { action as createAction } from "typesafe-actions";
-
-import { Async } from "./common";
-import { IEmployee } from "./Employee";
 
 export enum EmployeesActionType {
   WATCH_START = "WATCH_START",
@@ -19,49 +16,8 @@ export type EmployeesAction =
       type: EmployeesActionType.EMPLOYEES_FETCHED;
       payload: firebase.database.DataSnapshot;
     };
+
 type EmployeesDispatch = Dispatch<EmployeesAction>;
-
-export interface IEmployeesState {
-  employeesAction: Async<{ [uid: string]: IEmployee<string> }>;
-  unsubscribe: (() => void) | null;
-}
-
-export const INITIAL_STATE: IEmployeesState = {
-  employeesAction: { state: "INIT" },
-  unsubscribe: null,
-};
-
-export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
-  state = INITIAL_STATE,
-  action,
-) => {
-  switch (action.type) {
-    case EmployeesActionType.WATCH_START:
-      if (state.unsubscribe) {
-        state.unsubscribe();
-      }
-      return {
-        ...state,
-        employeesAction: { state: "PROGRESS" },
-        unsubscribe: action.payload,
-      };
-    case EmployeesActionType.UNSUBSCRIBE:
-      if (state.unsubscribe) {
-        state.unsubscribe();
-      }
-      return { ...state, employeesAction: { state: "INIT" } };
-    case EmployeesActionType.EMPLOYEES_FETCHED:
-      return {
-        ...state,
-        employeesAction: {
-          state: "COMPLETE",
-          value: action.payload.val() || {},
-        },
-      };
-    default:
-      return state;
-  }
-};
 
 export const unwatchEmployees = () =>
   createAction(EmployeesActionType.UNSUBSCRIBE);
