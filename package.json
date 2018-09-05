@@ -57,6 +57,9 @@
     "typescript": "^3.0.1",
     "typescript-eslint-parser": "^18.0.0"
   },
+  "resolutions": {
+    "parse5": "4.0.0"
+  },
   "jest": {
     "preset": "react-native",
     "transform": {
