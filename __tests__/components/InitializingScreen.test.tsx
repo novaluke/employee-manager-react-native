@@ -24,7 +24,7 @@ describe("InitializingScreen", () => {
   describe("when mounted", () => {
     it("subscribes to onAuthStateChanged", () => {
       const onAuthStub = jest.fn();
-      firebase.auth.mockImplementation(() => ({
+      (firebase.auth as any).mockImplementation(() => ({
         onAuthStateChanged: onAuthStub,
       }));
 
@@ -37,7 +37,7 @@ describe("InitializingScreen", () => {
   describe("when unmounted", () => {
     it("unsubscribes from onAuthStateChanged", () => {
       const unsubscribeStub = jest.fn();
-      firebase.auth.mockImplementation(() => ({
+      (firebase.auth as any).mockImplementation(() => ({
         onAuthStateChanged: () => unsubscribeStub,
       }));
 
@@ -49,18 +49,19 @@ describe("InitializingScreen", () => {
   });
 
   describe("when auth state changes", () => {
-    let onAuthCallback = (user: any) => user; // no-op
+    let onAuthCallback = (user: object | null) => user; // no-op
     beforeEach(() => {
-      firebase.auth.mockImplementation(() => ({
+      (firebase.auth as any).mockImplementation(() => ({
         /* eslint-disable-next-line no-return-assign */
-        onAuthStateChanged: (callback: any) => (onAuthCallback = callback),
+        onAuthStateChanged: (callback: typeof onAuthCallback) =>
+          (onAuthCallback = callback),
       }));
 
       shallow(<InitializingScreen {...stubbedProps} />);
     });
 
     it("navigates to Main if logged in", () => {
-      onAuthCallback({ userId: 1 });
+      onAuthCallback({});
 
       expect(stubbedNavigation.navigate).toHaveBeenCalledTimes(1);
       expect(stubbedNavigation.navigate).toHaveBeenCalledWith("Main");

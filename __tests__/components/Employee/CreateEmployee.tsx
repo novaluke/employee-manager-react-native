@@ -8,6 +8,7 @@ import { StubbedStore } from "../../helpers/redux";
 
 import { AsyncButton } from "../../../src/components/common";
 import CreateEmployee from "../../../src/components/Employee/CreateEmployee";
+import EmployeeForm from "../../../src/components/Employee/EmployeeForm";
 import {
   createEmployee,
   IEmployeeState,
@@ -21,6 +22,11 @@ jest.mock(
   "../../../src/components/Employee/EmployeeForm",
   () => "EmployeeForm",
 );
+
+// For some reason TypeScript doesn't know about a `connect`ed class' static
+// methods, and no solution is readily available after searching, so just
+// override the types here until a better solution can be found.
+const { navigationOptions } = CreateEmployee as any;
 
 describe("CreateEmployee", () => {
   let props: any;
@@ -56,7 +62,7 @@ describe("CreateEmployee", () => {
   });
 
   it("passes dispatchFieldUpdate to the EmployeeForm", () => {
-    const employeeForm = mkWrapper().find("EmployeeForm");
+    const employeeForm = mkWrapper().find(EmployeeForm);
     // Can't just check the functions are equal since the dispatch* version is
     // wrapped inside another function in order to hook up the dispatch
     expect(updateField).toHaveBeenCalledTimes(0);
@@ -87,7 +93,7 @@ describe("CreateEmployee", () => {
   });
 
   it("sets the page title", () => {
-    expect(CreateEmployee.navigationOptions.title).toEqual("Add an employee");
+    expect(navigationOptions.title).toEqual("Add an employee");
   });
 
   it("resets the form when unmounted", () => {

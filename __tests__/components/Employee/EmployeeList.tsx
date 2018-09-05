@@ -24,13 +24,21 @@ jest.mock("../../../src/store/Employees");
 // and does not have an onPress
 jest.mock("TouchableOpacity", () => "TouchableOpacity");
 
+// For some reason TypeScript doesn't know about a `connect`ed class' static
+// methods, and no solution is readily available after searching, so just
+// override the types here until a better solution can be found.
+const { navigationOptions } = EmployeeList as any;
+
 describe("EmployeeList", () => {
   let props: any;
   let store: StubbedStore;
   let state: { employees: IEmployeesState };
   beforeEach(() => {
     state = {
-      employees: { employeesAction: { state: "INIT" } },
+      employees: {
+        employeesAction: { state: "INIT" },
+        unsubscribe: jest.fn(),
+      },
     };
     store = new StubbedStore(state);
     props = {
@@ -45,7 +53,7 @@ describe("EmployeeList", () => {
     }).dive();
 
   it("shows a spinner when data is loading", () => {
-    state.employees = { employeesAction: { state: "PROGRESS" } };
+    state.employees.employeesAction = { state: "PROGRESS" };
 
     const wrapper = mkWrapper();
 
@@ -53,7 +61,7 @@ describe("EmployeeList", () => {
   });
 
   it("does not show a spinner when data is not loading", () => {
-    state.employees = { employeesAction: { state: "INIT" } }; // Good to be explicit
+    state.employees.employeesAction = { state: "INIT" }; // Good to be explicit
 
     const wrapper = mkWrapper();
 
@@ -75,6 +83,7 @@ describe("EmployeeList", () => {
           state: "COMPLETE",
           value: { foo, bar },
         },
+        unsubscribe: jest.fn(),
       };
       component = reactTestRenderer.create(
         <Provider store={store}>
@@ -104,7 +113,7 @@ describe("EmployeeList", () => {
   it("adds a button for CreateEmployee to the header", () => {
     const { navigation } = props;
     const headerRightWrapped = shallow(
-      EmployeeList.navigationOptions({ navigation }).headerRight,
+      navigationOptions({ navigation }).headerRight,
     );
     expect(navigation.navigate).not.toHaveBeenCalled();
 
@@ -114,7 +123,7 @@ describe("EmployeeList", () => {
   });
 
   it("sets the page title", () => {
-    expect(EmployeeList.navigationOptions({}).title).toEqual("Employees");
+    expect(navigationOptions({}).title).toEqual("Employees");
   });
 
   it("watches the Employees data on mount", () => {
@@ -128,6 +137,6 @@ describe("EmployeeList", () => {
     expect(unwatchEmployees).not.toHaveBeenCalled();
 
     wrapper.unmount();
-    expect(unwatchEmployees).toHaveBeenCalledWith(props.navigation);
+    expect(unwatchEmployees).toHaveBeenCalledWith();
   });
 });

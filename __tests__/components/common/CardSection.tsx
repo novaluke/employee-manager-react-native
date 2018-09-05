@@ -4,7 +4,7 @@ import React from "react";
 import { shallow } from "enzyme";
 import reactTestRenderer from "react-test-renderer";
 
-import { StyleSheet } from "react-native";
+import { StyleSheet, ViewProps } from "react-native";
 
 import { CardSection } from "../../../src/components/common";
 
@@ -28,7 +28,7 @@ describe("CardSection", () => {
   });
 
   it("passes props through to the underlying view", () => {
-    const props = { foo: "bar" };
+    const props = { foo: "bar" } as ViewProps & { foo: string };
     const wrapper = shallow(<CardSection {...props} />);
     expect(wrapper.prop("foo")).toBe(props.foo);
   });

@@ -10,6 +10,7 @@ import { StubbedStore } from "../../helpers/redux";
 
 import { AsyncButton } from "../../../src/components/common";
 import EditEmployee from "../../../src/components/Employee/EditEmployee";
+import EmployeeForm from "../../../src/components/Employee/EmployeeForm";
 import {
   closeFireModal,
   fireEmployee,
@@ -26,6 +27,11 @@ jest.mock(
   "../../../src/components/Employee/EmployeeForm",
   () => "EmployeeForm",
 );
+
+// For some reason TypeScript doesn't know about a `connect`ed class' static
+// methods, and no solution is readily available after searching, so just
+// override the types here until a better solution can be found.
+const { navigationOptions } = EditEmployee as any;
 
 describe("EmployeeList", () => {
   let props: any;
@@ -61,7 +67,9 @@ describe("EmployeeList", () => {
   });
 
   it("passes dispatchFieldUpdate to the EmployeeForm", () => {
-    const employeeForm = mkWrapper().find("EmployeeForm");
+    // Need to use the actual component type rather than a string or we lose
+    // type safety
+    const employeeForm = mkWrapper().find(EmployeeForm);
     // Can't just check the functions are equal since the dispatch* version is
     // wrapped inside another function in order to hook up the dispatch
     expect(updateField).toHaveBeenCalledTimes(0);
@@ -170,8 +178,7 @@ describe("EmployeeList", () => {
   it("sets the page title based on the employeeName", () => {
     const mockGetParam = jest.fn(() => state.employee.employeeName);
     expect(
-      EditEmployee.navigationOptions({ navigation: { getParam: mockGetParam } })
-        .title,
+      navigationOptions({ navigation: { getParam: mockGetParam } }).title,
     ).toMatchSnapshot();
     expect(mockGetParam).toHaveBeenCalledWith("employeeName");
   });
