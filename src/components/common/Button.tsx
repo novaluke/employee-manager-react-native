@@ -3,12 +3,10 @@ import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 const styles = StyleSheet.create({
   buttonStyle: {
-    alignSelf: "stretch",
     backgroundColor: "#fff",
     borderColor: "#007aff",
     borderRadius: 5,
     borderWidth: 1,
-    flex: 1,
     marginLeft: 5,
     marginRight: 5,
   },

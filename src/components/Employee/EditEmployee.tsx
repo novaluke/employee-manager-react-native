@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, View } from "react-native";
 import reactNativeCommunications from "react-native-communications";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
@@ -96,7 +96,11 @@ class EditEmployee extends Component<IProps> {
           </CardSection>
 
           <CardSection>
-            <Button onPress={textSchedule(phone, shift)}>Text schedule</Button>
+            <View style={{ flex: 1 }}>
+              <Button onPress={textSchedule(phone, shift)}>
+                Text schedule
+              </Button>
+            </View>
           </CardSection>
 
           <CardSection>

@@ -12,12 +12,10 @@ exports[`Button renders properly 1`] = `
   onStartShouldSetResponder={[Function]}
   style={
     Object {
-      "alignSelf": "stretch",
       "backgroundColor": "#fff",
       "borderColor": "#007aff",
       "borderRadius": 5,
       "borderWidth": 1,
-      "flex": 1,
       "marginLeft": 5,
       "marginRight": 5,
       "opacity": 1,

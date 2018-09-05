@@ -26,7 +26,7 @@ const AsyncButton: React.SFC<IProps> = ({
   onPress,
   size = SpinnerSize.Large,
 }) => (
-  <View style={{ flex: 1, flexDirection: "row" }}>
+  <View style={{ flex: 1, flexDirection: "column" }}>
     {asyncAction.state === "ERROR" && (
       <Text style={styles.errorTextStyle}>{asyncAction.error}</Text>
     )}
