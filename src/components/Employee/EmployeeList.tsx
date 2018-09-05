@@ -55,8 +55,7 @@ class EmployeeList extends Component<IProps> {
   }
 
   public componentWillUnmount() {
-    const { navigation } = this.props;
-    unwatchEmployees(navigation);
+    unwatchEmployees();
   }
 
   private renderEmployee = ({
