@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
-    "lint": "yarn eslint src && yarn tslint -p tsconfig.json && yarn tsc --noEmit"
+    "lint": "yarn eslint src && yarn tslint -p tsconfig.json && yarn tsc --noEmit",
+    "precommit": "yarn lint && yarn test",
+    "prepush": "yarn lint && yarn test"
   },
   "dependencies": {
     "@types/react-native-communications": "^2.2.1",
@@ -42,6 +44,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-prettier": "^2.6.2",
     "eslint-plugin-react": "^7.10.0",
+    "husky": "^0.14.3",
     "jest": "23.4.2",
     "jest-enzyme": "6.0.2",
     "prettier": "^1.14.1",
