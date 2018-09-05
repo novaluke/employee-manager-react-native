@@ -65,7 +65,7 @@ class EmployeeList extends Component<IProps> {
     item: IEmployee<string>;
   }) => {
     const { dispatchEditEmployee, navigation } = this.props;
-    const onPress = () => dispatchEditEmployee(navigation, employee);
+    const onPress = () => dispatchEditEmployee(employee, navigation);
     return (
       <TouchableOpacity onPress={onPress}>
         <CardSection>

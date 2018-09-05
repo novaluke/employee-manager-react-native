@@ -169,8 +169,8 @@ export const createEmployee = (
 };
 
 export const editEmployee = (
-  navigation: NavigationScreenProp<any>,
   employee: IEmployee<string>,
+  navigation: NavigationScreenProp<any>,
 ) => (dispatch: EmployeeDispatch) => {
   dispatch(createAction(EmployeeActionType.EDIT, employee));
   navigation.navigate("EditEmployee", { employeeName: employee.employeeName });

@@ -369,7 +369,7 @@ describe("actions", () => {
 
   describe("editEmployee", () => {
     const runAction = (employee = {} as any) =>
-      editEmployee(navigation, employee)(dispatch);
+      editEmployee(employee, navigation)(dispatch);
 
     it("dispatches the edit action with the employee as payload", () => {
       runAction(testEmployee);

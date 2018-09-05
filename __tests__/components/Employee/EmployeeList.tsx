@@ -92,10 +92,10 @@ describe("EmployeeList", () => {
       const employeeComponents = component.root.findAllByType(TouchableOpacity);
 
       employeeComponents[0].props.onPress();
-      expect(editEmployee).toHaveBeenCalledWith(navigation, foo);
+      expect(editEmployee).toHaveBeenCalledWith(foo, navigation);
 
       employeeComponents[1].props.onPress();
-      expect(editEmployee).toHaveBeenCalledWith(navigation, bar);
+      expect(editEmployee).toHaveBeenCalledWith(bar, navigation);
 
       expect(editEmployee).toHaveBeenCalledTimes(2);
     });
