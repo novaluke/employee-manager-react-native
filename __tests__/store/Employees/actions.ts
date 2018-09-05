@@ -59,10 +59,13 @@ describe("Employees actions", () => {
 
       it("sets an unsubscribe function to the watch started action payload", () => {
         const dispatch = jest.fn(({ payload }) => payload());
+        on.mockImplementation((_, callback) => callback);
 
-        const watchingFunc = watchEmployees(navigation)(dispatch);
+        watchEmployees(navigation)(dispatch);
+        const watchingFunc = on.mock.calls[0][1];
 
-        // unsubscribe is called by dispatch as soon as the action is dispatched
+        // unsubscribe is called by the mock dispatch as soon as the action is
+        // dispatched
         expect(off).toHaveBeenCalledTimes(1);
         expect(off).toHaveBeenCalledWith("value", watchingFunc);
       });
