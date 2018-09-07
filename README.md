@@ -22,6 +22,10 @@ tools](https://facebook.github.io/react-native/docs/getting-started.html)
 4. Run a server to recompile the app whenever files are changed (as well as push
    those changes to the app, if the appropriate setting in the app is enabled).
 
+Or, save yourself the headache and use
+[mayhewluke/react-native-docker](https://github.com/mayhewluke/react-native-docker)
+for easy, almost no-configuration access to a React Native docker image.
+
 ### Credentials
 
 This app uses firebase as a backend, so it needs to be provided with credentials
