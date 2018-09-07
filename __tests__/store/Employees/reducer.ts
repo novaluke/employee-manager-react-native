@@ -83,7 +83,7 @@ describe("Employees reducer", () => {
 
         expect(testState.employeesAction).not.toEqual(expectedAction);
         const state = reducer(testState, {
-          payload: { val: jest.fn() } as any,
+          payload: {},
           type: EmployeesActionType.EMPLOYEES_FETCHED,
         });
 
@@ -91,26 +91,31 @@ describe("Employees reducer", () => {
       });
 
       it("overwrites previously fetched data", () => {
-        const data = { foo: "bar" };
+        const data1 = { foo: testEmployee };
+        const data2 = { bar: testEmployee };
 
         const state = reducer(testState, {
-          payload: { val: jest.fn(() => data) } as any,
+          payload: data1,
+          type: EmployeesActionType.EMPLOYEES_FETCHED,
+        });
+        const state2 = reducer(state, {
+          payload: data2,
           type: EmployeesActionType.EMPLOYEES_FETCHED,
         });
 
-        expect(state.employeesAction.state).toEqual("COMPLETE");
-        if (state.employeesAction.state === "COMPLETE") {
-          expect(state.employeesAction.value).toBe(data);
+        expect(state2.employeesAction.state).toEqual("COMPLETE");
+        if (state2.employeesAction.state === "COMPLETE") {
+          expect(state2.employeesAction.value).toBe(data2);
         }
       });
 
-      it("sets the data as empty if the return value is null", () => {
+      it("sets the data as empty if the payload is null", () => {
         testState.employeesAction = {
           state: "COMPLETE",
           value: { foo: testEmployee },
         };
         const state = reducer(testState, {
-          payload: { val: jest.fn(() => null) } as any,
+          payload: null,
           type: EmployeesActionType.EMPLOYEES_FETCHED,
         });
 

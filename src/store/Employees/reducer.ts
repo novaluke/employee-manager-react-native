@@ -39,7 +39,7 @@ export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
         ...state,
         employeesAction: {
           state: "COMPLETE",
-          value: action.payload.val() || {},
+          value: action.payload || {},
         },
       };
     default:

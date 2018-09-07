@@ -3,6 +3,8 @@ import { NavigationScreenProp } from "react-navigation";
 import { Dispatch } from "redux";
 import { action as createAction } from "typesafe-actions";
 
+import { IEmployee } from "../Employee";
+
 export enum EmployeesActionType {
   WATCH_START = "WATCH_START",
   UNSUBSCRIBE = "UNSUBSCRIBE",
@@ -14,7 +16,7 @@ export type EmployeesAction =
   | { type: EmployeesActionType.UNSUBSCRIBE }
   | {
       type: EmployeesActionType.EMPLOYEES_FETCHED;
-      payload: firebase.database.DataSnapshot;
+      payload: { [uid: string]: IEmployee<string> } | null;
     };
 
 type EmployeesDispatch = Dispatch<EmployeesAction>;
@@ -32,7 +34,10 @@ export const watchEmployees = (navigation: NavigationScreenProp<any>) => (
   }
   const refString = `/users/${currentUser.uid}/employees`;
   const onEmployeesFetched = (snapshot: firebase.database.DataSnapshot) =>
-    dispatch(createAction(EmployeesActionType.EMPLOYEES_FETCHED, snapshot));
+    dispatch({
+      payload: snapshot.val(),
+      type: EmployeesActionType.EMPLOYEES_FETCHED,
+    });
   const unsubscribe = () =>
     firebase
       .database()

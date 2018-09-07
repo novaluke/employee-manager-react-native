@@ -84,10 +84,11 @@ describe("Employees actions", () => {
       });
 
       describe("when the watch is triggered", () => {
-        it("dispatches the 'data fetched' action with the snapshot as payload", () => {
+        it("dispatches the 'data fetched' action with the snapshot value as payload", () => {
           const dispatch = jest.fn();
-          const payload = {};
-          on.mockImplementation((_, callback) => callback(payload));
+          const payload = { foo: "bar" };
+          const snapshot = { val: () => payload };
+          on.mockImplementation((_, callback) => callback(snapshot));
 
           watchEmployees(navigation)(dispatch);
 
@@ -102,7 +103,7 @@ describe("Employees actions", () => {
       describe("when data is available immediately", () => {
         it("dispatches the watch start action before the 'data fetched' action", () => {
           const dispatch = jest.fn();
-          on.mockImplementation((_, callback) => callback({}));
+          on.mockImplementation((_, callback) => callback({ val: jest.fn() }));
 
           watchEmployees(navigation)(dispatch);
 
