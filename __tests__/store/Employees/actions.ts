@@ -84,37 +84,17 @@ describe("Employees actions", () => {
       });
 
       describe("when the watch is triggered", () => {
-        describe("with a DataSnapshot", () => {
-          it("dispatches the 'data fetched' action with the snapshot as payload", () => {
-            const dispatch = jest.fn();
-            const payload = {};
-            on.mockImplementation((_, callback) => callback(payload));
+        it("dispatches the 'data fetched' action with the snapshot as payload", () => {
+          const dispatch = jest.fn();
+          const payload = {};
+          on.mockImplementation((_, callback) => callback(payload));
 
-            watchEmployees(navigation)(dispatch);
+          watchEmployees(navigation)(dispatch);
 
-            // The watcher is triggered as soon as it's registered (see above)
-            expect(dispatch).toHaveBeenCalledWith({
-              payload,
-              type: EmployeesActionType.EMPLOYEES_FETCHED,
-            });
-          });
-        });
-
-        // Note that this is necessary because the type definition for `.on`
-        // indicates that it might pass a snapshot *or* null, so we must satisfy
-        // that constraint, even though the docs seem to imply it will always pass
-        // a snapshot.
-        describe("with no argument", () => {
-          it("does not dispatch the 'data fetched' action", () => {
-            const dispatch = jest.fn();
-            on.mockImplementation((_, callback) => callback(null));
-
-            watchEmployees(navigation)(dispatch);
-
-            expect(dispatch).not.toHaveBeenCalledWith({
-              payload: expect.any(Object),
-              type: EmployeesActionType.EMPLOYEES_FETCHED,
-            });
+          // The watcher is triggered as soon as it's registered (see above)
+          expect(dispatch).toHaveBeenCalledWith({
+            payload,
+            type: EmployeesActionType.EMPLOYEES_FETCHED,
           });
         });
       });

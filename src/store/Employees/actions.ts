@@ -31,12 +31,8 @@ export const watchEmployees = (navigation: NavigationScreenProp<any>) => (
     return () => null;
   }
   const refString = `/users/${currentUser.uid}/employees`;
-  const onEmployeesFetched = (
-    snapshot: firebase.database.DataSnapshot | null,
-  ) =>
-    snapshot
-      ? dispatch(createAction(EmployeesActionType.EMPLOYEES_FETCHED, snapshot))
-      : null;
+  const onEmployeesFetched = (snapshot: firebase.database.DataSnapshot) =>
+    dispatch(createAction(EmployeesActionType.EMPLOYEES_FETCHED, snapshot));
   const unsubscribe = () =>
     firebase
       .database()
