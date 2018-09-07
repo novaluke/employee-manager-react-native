@@ -1,6 +1,7 @@
 import "jest-enzyme";
 
-import { Async } from "../../../src/store";
+import { AsyncValue } from "../../../src/store";
+import { Action } from "../../../src/store/common/Async";
 import {
   EmployeeActionType,
   employeeReducer as reducer,
@@ -32,10 +33,10 @@ describe("Employee reducer", () => {
       uid: "uid2",
     };
     testState = {
-      createAction: { state: "PROGRESS" } as Async<null>,
-      fireAction: { state: "PROGRESS" } as Async<null>,
+      createAction: { state: "PROGRESS" } as AsyncValue<null>,
+      fireAction: { state: "PROGRESS" } as AsyncValue<null>,
       fireModalShown: false,
-      updateAction: { state: "PROGRESS" } as Async<null>,
+      updateAction: { state: "PROGRESS" } as AsyncValue<null>,
       ...testEmployee,
     };
   });
@@ -79,7 +80,8 @@ describe("Employee reducer", () => {
 
       expect(testState.createAction).not.toEqual(expectedAction);
       const state = reducer(testState, {
-        type: EmployeeActionType.CREATE_START,
+        payload: Action.start(),
+        type: EmployeeActionType.CREATE_ACTION,
       });
 
       expect(state).toEqual({ ...testState, createAction: expectedAction });
@@ -87,7 +89,8 @@ describe("Employee reducer", () => {
 
     it("resets the state when the request succeeds", () => {
       const state = reducer(testState, {
-        type: EmployeeActionType.CREATE_SUCCESS,
+        payload: Action.success(null),
+        type: EmployeeActionType.CREATE_ACTION,
       });
 
       expect(state).toEqual(INITIAL_STATE);
@@ -99,7 +102,8 @@ describe("Employee reducer", () => {
 
         expect(testState.createAction).not.toEqual(expectedAction);
         const state = reducer(testState, {
-          type: EmployeeActionType.CREATE_FAIL,
+          payload: Action.failure("foo"),
+          type: EmployeeActionType.CREATE_ACTION,
         });
 
         expect(state).toEqual({ ...testState, createAction: expectedAction });
@@ -107,7 +111,8 @@ describe("Employee reducer", () => {
 
       it("sets an error message on the creation asyncAction that matches a snapshot", () => {
         const state = reducer(testState, {
-          type: EmployeeActionType.CREATE_FAIL,
+          payload: Action.failure("foo"),
+          type: EmployeeActionType.CREATE_ACTION,
         });
 
         expect(state.createAction.state).toEqual("ERROR");
@@ -125,7 +130,8 @@ describe("Employee reducer", () => {
 
       expect(testState.updateAction).not.toEqual(expectedAction);
       const state = reducer(testState, {
-        type: EmployeeActionType.UPDATE_START,
+        payload: Action.start(),
+        type: EmployeeActionType.UPDATE_ACTION,
       });
 
       expect(state).toEqual({ ...testState, updateAction: expectedAction });
@@ -133,7 +139,8 @@ describe("Employee reducer", () => {
 
     it("resets the state when the request succeeds", () => {
       const state = reducer(testState, {
-        type: EmployeeActionType.UPDATE_SUCCESS,
+        payload: Action.success(null),
+        type: EmployeeActionType.UPDATE_ACTION,
       });
 
       expect(state).toEqual(INITIAL_STATE);
@@ -145,7 +152,8 @@ describe("Employee reducer", () => {
 
         expect(testState.updateAction).not.toEqual(expectedAction);
         const state = reducer(testState, {
-          type: EmployeeActionType.UPDATE_FAIL,
+          payload: Action.failure("foo"),
+          type: EmployeeActionType.UPDATE_ACTION,
         });
 
         expect(state).toEqual({ ...testState, updateAction: expectedAction });
@@ -153,7 +161,8 @@ describe("Employee reducer", () => {
 
       it("sets an error message on the update asyncAction that matches a snapshot", () => {
         const state = reducer(testState, {
-          type: EmployeeActionType.UPDATE_FAIL,
+          payload: Action.failure("foo"),
+          type: EmployeeActionType.UPDATE_ACTION,
         });
 
         expect(state.updateAction.state).toEqual("ERROR");
@@ -172,7 +181,8 @@ describe("Employee reducer", () => {
 
         expect(testState.fireAction).not.toEqual(expectedAction);
         const state = reducer(testState, {
-          type: EmployeeActionType.FIRE_START,
+          payload: Action.start(),
+          type: EmployeeActionType.FIRE_ACTION,
         });
 
         expect(state).toEqual({
@@ -184,7 +194,8 @@ describe("Employee reducer", () => {
 
       it("closes the fire employee modal", () => {
         const state = reducer(testState, {
-          type: EmployeeActionType.FIRE_START,
+          payload: Action.start(),
+          type: EmployeeActionType.FIRE_ACTION,
         });
 
         expect(state).toEqual({
@@ -197,7 +208,8 @@ describe("Employee reducer", () => {
 
     it("resets the state when the request succeeds", () => {
       const state = reducer(testState, {
-        type: EmployeeActionType.FIRE_SUCCESS,
+        payload: Action.success(null),
+        type: EmployeeActionType.FIRE_ACTION,
       });
 
       expect(state).toEqual(INITIAL_STATE);
@@ -209,7 +221,8 @@ describe("Employee reducer", () => {
 
         expect(testState.fireAction).not.toEqual(expectedAction);
         const state = reducer(testState, {
-          type: EmployeeActionType.FIRE_FAIL,
+          payload: Action.failure("foo"),
+          type: EmployeeActionType.FIRE_ACTION,
         });
 
         expect(state).toEqual({ ...testState, fireAction: expectedAction });
@@ -217,7 +230,8 @@ describe("Employee reducer", () => {
 
       it("sets an error message on the 'fire employee' asyncAction that matches a snapshot", () => {
         const state = reducer(testState, {
-          type: EmployeeActionType.FIRE_FAIL,
+          payload: Action.failure("foo"),
+          type: EmployeeActionType.FIRE_ACTION,
         });
 
         expect(state.fireAction.state).toEqual("ERROR");

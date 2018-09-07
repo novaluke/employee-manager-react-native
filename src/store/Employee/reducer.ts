@@ -1,6 +1,6 @@
 import { Reducer } from "redux";
 
-import { Async } from "../common";
+import { asyncReducer, AsyncValue } from "../common/Async";
 
 import { EmployeeAction, EmployeeActionType } from "./actions";
 
@@ -22,9 +22,9 @@ export interface IEmployee<T extends null | string> {
 }
 
 export interface IEmployeeState extends IEmployee<null | string> {
-  createAction: Async<null>;
-  updateAction: Async<null>;
-  fireAction: Async<null>;
+  createAction: AsyncValue<null>;
+  updateAction: AsyncValue<null>;
+  fireAction: AsyncValue<null>;
   fireModalShown: boolean;
 }
 
@@ -46,24 +46,30 @@ export const employeeReducer: Reducer<IEmployeeState, EmployeeAction> = (
   switch (action.type) {
     case EmployeeActionType.UPDATE_FIELD:
       return { ...state, [action.payload.field]: action.payload.value };
-    case EmployeeActionType.CREATE_START:
-      return { ...state, createAction: { state: "PROGRESS" } };
-    case EmployeeActionType.CREATE_SUCCESS:
-      return INITIAL_STATE;
-    case EmployeeActionType.CREATE_FAIL:
-      return {
-        ...state,
-        createAction: { state: "ERROR", error: "Something went wrong!" },
-      };
-    case EmployeeActionType.UPDATE_START:
-      return { ...state, updateAction: { state: "PROGRESS" } };
-    case EmployeeActionType.UPDATE_SUCCESS:
-      return INITIAL_STATE;
-    case EmployeeActionType.UPDATE_FAIL:
-      return {
-        ...state,
-        updateAction: { state: "ERROR", error: "Something went wrong!" },
-      };
+    case EmployeeActionType.CREATE_ACTION:
+      return asyncReducer(
+        state,
+        createAction => ({ createAction }),
+        action.payload
+          .failure(_ => ["Something went wrong!", {}])
+          .success(x => [x, INITIAL_STATE]),
+      );
+    case EmployeeActionType.UPDATE_ACTION:
+      return asyncReducer(
+        state,
+        updateAction => ({ updateAction }),
+        action.payload
+          .failure(_ => ["Something went wrong!", {}])
+          .success(x => [x, INITIAL_STATE]),
+      );
+    case EmployeeActionType.FIRE_ACTION:
+      return asyncReducer(
+        state,
+        fireAction => ({ fireAction }),
+        action.payload
+          .failure(_ => ["Something went wrong!", {}])
+          .success(x => [x, INITIAL_STATE]),
+      );
     case EmployeeActionType.EDIT:
       return { ...state, ...action.payload };
     case EmployeeActionType.RESET:
@@ -72,19 +78,6 @@ export const employeeReducer: Reducer<IEmployeeState, EmployeeAction> = (
       return { ...state, fireModalShown: true };
     case EmployeeActionType.CLOSE_MODAL:
       return { ...state, fireModalShown: false };
-    case EmployeeActionType.FIRE_START:
-      return {
-        ...state,
-        fireAction: { state: "PROGRESS" },
-        fireModalShown: false,
-      };
-    case EmployeeActionType.FIRE_SUCCESS:
-      return INITIAL_STATE;
-    case EmployeeActionType.FIRE_FAIL:
-      return {
-        ...state,
-        fireAction: { state: "ERROR", error: "Something went wrong!" },
-      };
     default:
       return state;
   }

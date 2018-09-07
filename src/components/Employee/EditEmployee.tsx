@@ -4,7 +4,7 @@ import reactNativeCommunications from "react-native-communications";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { Async, IRootState } from "../../store";
+import { AsyncValue, IRootState } from "../../store";
 import {
   closeFireModal,
   fireEmployee,
@@ -23,9 +23,9 @@ interface IProps extends IFormProps, NavigationScreenProps {
   phone: string;
   shift: ShiftDay;
   uid: string | null;
-  fireAction: Async<null>;
+  fireAction: AsyncValue<null>;
   fireModalShown: boolean;
-  updateAction: Async<null>;
+  updateAction: AsyncValue<null>;
   dispatchShowFireModal: () => void;
   dispatchUpdateEmployee: (
     employee: IEmployee<string | null>,

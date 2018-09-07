@@ -9,7 +9,7 @@ import {
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { Async, IRootState } from "../../store";
+import { AsyncValue, IRootState } from "../../store";
 import { editEmployee, IEmployee } from "../../store/Employee";
 import { unwatchEmployees, watchEmployees } from "../../store/Employees";
 
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 interface IProps extends NavigationScreenProps {
   dispatchWatchEmployees: (navigation: NavigationScreenProp<any>) => void;
   dispatchEditEmployee: any;
-  employeesAction: Async<{ [uid: string]: IEmployee<string> }>;
+  employeesAction: AsyncValue<{ [uid: string]: IEmployee<string> }>;
 }
 
 class EmployeeList extends Component<IProps> {

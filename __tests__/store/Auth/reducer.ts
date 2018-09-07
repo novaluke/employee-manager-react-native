@@ -2,7 +2,7 @@ import "jest-enzyme";
 
 import firebase from "firebase";
 
-import { Async } from "../../../src/store";
+import { AsyncValue } from "../../../src/store";
 import {
   AuthActionType,
   authReducer as reducer,
@@ -13,7 +13,7 @@ import {
 describe("Auth reducer", () => {
   const testState: IAuthState = {
     email: "user@website.com",
-    loginAction: { state: "PROGRESS" } as Async<any>,
+    loginAction: { state: "PROGRESS" } as AsyncValue<any>,
     password: "supersecure",
     user: {} as firebase.auth.UserCredential,
   };

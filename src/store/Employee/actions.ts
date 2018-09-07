@@ -3,23 +3,19 @@ import { NavigationScreenProp } from "react-navigation";
 import { Dispatch } from "redux";
 import { action as createAction } from "typesafe-actions";
 
-import { IEmployee, ShiftDay } from "./reducer";
+import { IEmployee, IEmployeeState, ShiftDay } from "./reducer";
+
+import { Action } from "../common/Async";
 
 export enum EmployeeActionType {
   UPDATE_FIELD = "UPDATE_FIELD",
-  CREATE_START = "CREATE_START",
-  CREATE_SUCCESS = "CREATE_SUCCESS",
-  CREATE_FAIL = "CREATE_FAIL",
-  UPDATE_START = "UPDATE_START",
-  UPDATE_SUCCESS = "UPDATE_SUCCESS",
-  UPDATE_FAIL = "UPDATE_FAIL",
   EDIT = "EDIT",
   RESET = "RESET",
   SHOW_MODAL = "SHOW_MODAL",
   CLOSE_MODAL = "CLOSE_MODAL",
-  FIRE_START = "FIRE_START",
-  FIRE_SUCCESS = "FIRE_SUCCESS",
-  FIRE_FAIL = "FIRE_FAIL",
+  CREATE_ACTION = "CREATE_ACTION",
+  UPDATE_ACTION = "UPDATE_ACTION",
+  FIRE_ACTION = "FIRE_ACTION",
 }
 
 export type FieldUpdatePayload =
@@ -31,19 +27,22 @@ export type EmployeeAction =
       type: EmployeeActionType.UPDATE_FIELD;
       payload: FieldUpdatePayload;
     }
-  | { type: EmployeeActionType.CREATE_START }
-  | { type: EmployeeActionType.CREATE_SUCCESS }
-  | { type: EmployeeActionType.CREATE_FAIL }
-  | { type: EmployeeActionType.UPDATE_START }
-  | { type: EmployeeActionType.UPDATE_SUCCESS }
-  | { type: EmployeeActionType.UPDATE_FAIL }
   | { type: EmployeeActionType.EDIT; payload: IEmployee<string> }
   | { type: EmployeeActionType.RESET }
   | { type: EmployeeActionType.SHOW_MODAL }
   | { type: EmployeeActionType.CLOSE_MODAL }
-  | { type: EmployeeActionType.FIRE_START }
-  | { type: EmployeeActionType.FIRE_SUCCESS }
-  | { type: EmployeeActionType.FIRE_FAIL };
+  | {
+      type: EmployeeActionType.CREATE_ACTION;
+      payload: Action<string, null, IEmployeeState>;
+    }
+  | {
+      type: EmployeeActionType.UPDATE_ACTION;
+      payload: Action<string, null, IEmployeeState>;
+    }
+  | {
+      type: EmployeeActionType.FIRE_ACTION;
+      payload: Action<string, null, IEmployeeState>;
+    };
 
 type EmployeeDispatch = Dispatch<EmployeeAction>;
 
@@ -52,11 +51,17 @@ export const updateField = (payload: FieldUpdatePayload) =>
 
 const createSuccess = (dispatch: EmployeeDispatch, navigate: any) => () => {
   navigate("EmployeeList");
-  dispatch(createAction(EmployeeActionType.CREATE_SUCCESS));
+  dispatch({
+    payload: Action.success(null),
+    type: EmployeeActionType.CREATE_ACTION,
+  });
 };
 
 const createFail = (dispatch: EmployeeDispatch) => () =>
-  dispatch(createAction(EmployeeActionType.CREATE_FAIL));
+  dispatch({
+    payload: Action.failure(""),
+    type: EmployeeActionType.CREATE_ACTION,
+  });
 
 export const createEmployee = (
   employee: IEmployee<null>,
@@ -66,7 +71,10 @@ export const createEmployee = (
   if (currentUser === null) {
     navigation.navigate("Auth");
   } else {
-    dispatch(createAction(EmployeeActionType.CREATE_START));
+    dispatch({
+      payload: Action.start(),
+      type: EmployeeActionType.CREATE_ACTION,
+    });
     return (
       firebase
         .database()
@@ -97,12 +105,17 @@ const updateSuccess = (
   navigation: NavigationScreenProp<any>,
 ) => () => {
   navigation.navigate("EmployeeList");
-  dispatch(createAction(EmployeeActionType.UPDATE_SUCCESS));
+  dispatch({
+    payload: Action.success(null),
+    type: EmployeeActionType.UPDATE_ACTION,
+  });
 };
 
-const updateFail = (dispatch: EmployeeDispatch) => () => {
-  dispatch(createAction(EmployeeActionType.UPDATE_FAIL));
-};
+const updateFail = (dispatch: EmployeeDispatch) => () =>
+  dispatch({
+    payload: Action.failure(""),
+    type: EmployeeActionType.UPDATE_ACTION,
+  });
 
 export const updateEmployee = (
   { uid, ...employee }: IEmployee<null | string>,
@@ -116,7 +129,10 @@ export const updateEmployee = (
     // type safety) or showing an error message at least
     navigation.navigate("EmployeeList");
   } else {
-    dispatch(createAction(EmployeeActionType.UPDATE_START));
+    dispatch({
+      payload: Action.start(),
+      type: EmployeeActionType.UPDATE_ACTION,
+    });
     return firebase
       .database()
       .ref(`/users/${currentUser.uid}/employees/${uid}`)
@@ -131,11 +147,17 @@ const fireSuccess = (
   navigation: NavigationScreenProp<any>,
 ) => () => {
   navigation.navigate("EmployeeList");
-  dispatch(createAction(EmployeeActionType.FIRE_SUCCESS));
+  dispatch({
+    payload: Action.success(null),
+    type: EmployeeActionType.FIRE_ACTION,
+  });
 };
 
 const fireFail = (dispatch: EmployeeDispatch) => () =>
-  dispatch(createAction(EmployeeActionType.FIRE_FAIL));
+  dispatch({
+    payload: Action.failure(""),
+    type: EmployeeActionType.FIRE_ACTION,
+  });
 
 export const showFireModal = () => createAction(EmployeeActionType.SHOW_MODAL);
 export const closeFireModal = () =>
@@ -153,7 +175,10 @@ export const fireEmployee = (
     // type safety) or showing an error message at least
     navigation.navigate("EmployeeList");
   } else {
-    dispatch(createAction(EmployeeActionType.FIRE_START));
+    dispatch({
+      payload: Action.start(),
+      type: EmployeeActionType.FIRE_ACTION,
+    });
     return firebase
       .database()
       .ref(`/users/${currentUser.uid}/employees/${uid}`)

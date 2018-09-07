@@ -1,12 +1,12 @@
 import { Reducer } from "redux";
 
-import { Async } from "../common";
+import { AsyncValue } from "../common/Async";
 import { IEmployee } from "../Employee";
 
 import { EmployeesAction, EmployeesActionType } from "./actions";
 
 export interface IEmployeesState {
-  employeesAction: Async<{ [uid: string]: IEmployee<string> }>;
+  employeesAction: AsyncValue<{ [uid: string]: IEmployee<string> }>;
   unsubscribe: (() => void) | null;
 }
 

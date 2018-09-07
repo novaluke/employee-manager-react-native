@@ -2,7 +2,7 @@ import React from "react";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { Async, IRootState } from "../store";
+import { AsyncValue, IRootState } from "../store";
 import { emailChanged, logIn, passwordChanged } from "../store/Auth";
 
 import { AsyncButton, Card, CardSection, Input } from "./common";
@@ -16,7 +16,7 @@ export interface IProps extends NavigationScreenProps {
     password: string,
     navigation: NavigationScreenProp<any>,
   ) => void;
-  loginAction: Async<null>;
+  loginAction: AsyncValue<null>;
   dispatchEmailChanged: (email: string) => void;
 }
 

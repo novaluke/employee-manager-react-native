@@ -1,14 +1,14 @@
 import firebase from "firebase";
 import { Reducer } from "redux";
 
-import { Async } from "../common";
+import { AsyncValue } from "../common/Async";
 
 import { AuthAction, AuthActionType } from "./actions";
 
 export interface IAuthState {
   email: string;
   password: string;
-  loginAction: Async<null>;
+  loginAction: AsyncValue<null>;
   user: firebase.auth.UserCredential | null;
 }
 

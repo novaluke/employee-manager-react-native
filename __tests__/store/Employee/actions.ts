@@ -5,6 +5,7 @@ import { NavigationScreenProp } from "react-navigation";
 
 import { stubNavigation } from "../../helpers/react-navigation";
 
+import { Action } from "../../../src/store/common/Async";
 import {
   closeFireModal,
   createEmployee,
@@ -94,7 +95,8 @@ describe("Employee actions", () => {
 
         return runAction().then(() => {
           expect(dispatch).toHaveBeenCalledWith({
-            type: EmployeeActionType.CREATE_START,
+            payload: Action.start(),
+            type: EmployeeActionType.CREATE_ACTION,
           });
         });
       });
@@ -123,7 +125,8 @@ describe("Employee actions", () => {
         it("dispatches the creation success action", () =>
           runAction().then(() => {
             expect(dispatch).toHaveBeenCalledWith({
-              type: EmployeeActionType.CREATE_SUCCESS,
+              payload: Action.success(null),
+              type: EmployeeActionType.CREATE_ACTION,
             });
           }));
 
@@ -140,7 +143,8 @@ describe("Employee actions", () => {
 
           return runAction().then(() => {
             expect(dispatch).toHaveBeenCalledWith({
-              type: EmployeeActionType.CREATE_FAIL,
+              payload: Action.failure(expect.any(String)),
+              type: EmployeeActionType.CREATE_ACTION,
             });
           });
         });
@@ -219,7 +223,8 @@ describe("Employee actions", () => {
 
         return runAction().then(() => {
           expect(dispatch).toHaveBeenCalledWith({
-            type: EmployeeActionType.UPDATE_START,
+            payload: Action.start(),
+            type: EmployeeActionType.UPDATE_ACTION,
           });
         });
       });
@@ -249,7 +254,8 @@ describe("Employee actions", () => {
         it("dispatches the update success action", () =>
           runAction().then(() => {
             expect(dispatch).toHaveBeenCalledWith({
-              type: EmployeeActionType.UPDATE_SUCCESS,
+              payload: Action.success(null),
+              type: EmployeeActionType.UPDATE_ACTION,
             });
           }));
 
@@ -266,7 +272,8 @@ describe("Employee actions", () => {
 
           return runAction().then(() => {
             expect(dispatch).toHaveBeenCalledWith({
-              type: EmployeeActionType.UPDATE_FAIL,
+              payload: Action.failure(expect.any(String)),
+              type: EmployeeActionType.UPDATE_ACTION,
             });
           });
         });
@@ -328,7 +335,8 @@ describe("Employee actions", () => {
 
         return runAction().then(() => {
           expect(dispatch).toHaveBeenCalledWith({
-            type: EmployeeActionType.FIRE_START,
+            payload: Action.start(),
+            type: EmployeeActionType.FIRE_ACTION,
           });
         });
       });
@@ -356,7 +364,8 @@ describe("Employee actions", () => {
         it("dispatches the 'fire employee' success action", () =>
           runAction().then(() => {
             expect(dispatch).toHaveBeenCalledWith({
-              type: EmployeeActionType.FIRE_SUCCESS,
+              payload: Action.success(null),
+              type: EmployeeActionType.FIRE_ACTION,
             });
           }));
 
@@ -373,7 +382,8 @@ describe("Employee actions", () => {
 
           return runAction().then(() => {
             expect(dispatch).toHaveBeenCalledWith({
-              type: EmployeeActionType.FIRE_FAIL,
+              payload: Action.failure(expect.any(String)),
+              type: EmployeeActionType.FIRE_ACTION,
             });
           });
         });

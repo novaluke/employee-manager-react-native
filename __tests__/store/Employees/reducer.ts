@@ -1,6 +1,6 @@
 import "jest-enzyme";
 
-import { Async } from "../../../src/store";
+import { AsyncValue } from "../../../src/store";
 import {
   EmployeesActionType,
   employeesReducer as reducer,
@@ -12,7 +12,7 @@ describe("Employees reducer", () => {
   let testState: IEmployeesState;
   beforeEach(() => {
     testState = {
-      employeesAction: { state: "PROGRESS" } as Async<any>,
+      employeesAction: { state: "PROGRESS" } as AsyncValue<any>,
       unsubscribe: jest.fn(),
     };
   });

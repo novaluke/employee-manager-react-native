@@ -1,13 +1,13 @@
 import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { Async } from "../../store";
+import { AsyncValue } from "../../store";
 import Button from "./Button";
 import Spinner, { Size as SpinnerSize } from "./Spinner";
 
 interface IProps {
   label: string;
-  asyncAction: Async<any>;
+  asyncAction: AsyncValue<any>;
   onPress: () => void;
   size?: SpinnerSize;
 }

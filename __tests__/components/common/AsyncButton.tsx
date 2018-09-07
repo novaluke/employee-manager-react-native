@@ -11,7 +11,7 @@ import {
   Spinner,
   SpinnerSize,
 } from "../../../src/components/common";
-import { Async } from "../../../src/store";
+import { AsyncValue } from "../../../src/store";
 
 describe("AsyncButton", () => {
   const defProps = {
@@ -108,7 +108,7 @@ describe("AsyncButton", () => {
     it("is the same as when asyncAction is 'INIT'", () => {
       const completeProps = {
         ...defProps,
-        asyncAction: { state: "COMPLETE", value: "" } as Async<any>,
+        asyncAction: { state: "COMPLETE", value: "" } as AsyncValue<any>,
       };
       const initWrapper = mkWrapper({ asyncAction: { state: "INIT" } });
       const completeComponent = <AsyncButton {...completeProps} />;

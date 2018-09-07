@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
-import { Async, IRootState } from "../../store";
+import { AsyncValue, IRootState } from "../../store";
 import {
   createEmployee,
   IEmployee,
@@ -17,7 +17,7 @@ interface IProps extends IFormProps, NavigationScreenProps {
   employeeName: string;
   phone: string;
   shift: ShiftDay;
-  createAction: Async<null>;
+  createAction: AsyncValue<null>;
   dispatchCreateEmployee: (
     employee: IEmployee<null>,
     navigation: NavigationScreenProp<any>,
