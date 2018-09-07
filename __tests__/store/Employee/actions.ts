@@ -60,7 +60,7 @@ describe("Employee actions", () => {
   });
 
   describe("createEmployee", () => {
-    const runAction = (employee = {} as any) =>
+    const runAction = (employee = { ...testEmployee, uid: null }) =>
       createEmployee(employee, navigation)(dispatch);
 
     describe("when not logged in", () => {
@@ -131,7 +131,7 @@ describe("Employee actions", () => {
           }));
 
         it("navigates to the employee list", () =>
-          createEmployee({} as any, navigation)(jest.fn()).then(() => {
+          runAction().then(() => {
             expect(navigation.navigate).toHaveBeenCalledTimes(1);
             expect(navigation.navigate).toHaveBeenCalledWith("EmployeeList");
           }));
@@ -153,7 +153,7 @@ describe("Employee actions", () => {
   });
 
   describe("editEmployee", () => {
-    const runAction = (employee = {} as any) =>
+    const runAction = (employee: IEmployee<string>) =>
       editEmployee(employee, navigation)(dispatch);
 
     it("dispatches the edit action with the employee as payload", () => {
@@ -185,7 +185,7 @@ describe("Employee actions", () => {
   });
 
   describe("updateEmployee", () => {
-    const runAction = (employee = {} as any) =>
+    const runAction = (employee = testEmployee) =>
       updateEmployee(employee, navigation)(dispatch);
 
     describe("when not logged in", () => {

@@ -49,7 +49,10 @@ type EmployeeDispatch = Dispatch<EmployeeAction>;
 export const updateField = (payload: FieldUpdatePayload) =>
   createAction(EmployeeActionType.UPDATE_FIELD, payload);
 
-const createSuccess = (dispatch: EmployeeDispatch, navigate: any) => () => {
+const createSuccess = (
+  dispatch: EmployeeDispatch,
+  navigate: NavigationScreenProp<any>["navigate"],
+) => () => {
   navigate("EmployeeList");
   dispatch({
     payload: Action.success(null),

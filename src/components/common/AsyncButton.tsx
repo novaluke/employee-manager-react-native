@@ -5,7 +5,7 @@ import { AsyncValue } from "../../store";
 import Button from "./Button";
 import Spinner, { Size as SpinnerSize } from "./Spinner";
 
-interface IProps {
+export interface IProps {
   label: string;
   asyncAction: AsyncValue<any>;
   onPress: () => void;

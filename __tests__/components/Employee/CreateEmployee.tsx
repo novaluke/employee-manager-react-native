@@ -3,6 +3,8 @@ import React from "react";
 
 import { shallow } from "enzyme";
 
+import { NavigationScreenProps } from "react-navigation";
+
 import { stubNavigation } from "../../helpers/react-navigation";
 import { StubbedStore } from "../../helpers/redux";
 
@@ -29,7 +31,7 @@ jest.mock(
 const { navigationOptions } = CreateEmployee as any;
 
 describe("CreateEmployee", () => {
-  let props: any;
+  let props: NavigationScreenProps;
   let store: StubbedStore;
   let state: { employee: IEmployeeState };
   beforeEach(() => {

@@ -13,7 +13,11 @@ export enum Size {
   Small = "small",
 }
 
-const Spinner: React.SFC<{ size: Size }> = ({ size }) => {
+export interface IProps {
+  size: Size;
+}
+
+const Spinner: React.SFC<IProps> = ({ size }) => {
   const { spinnerStyle } = styles;
   return (
     <View style={spinnerStyle}>

@@ -30,7 +30,10 @@ const styles = StyleSheet.create({
 
 interface IProps extends NavigationScreenProps {
   dispatchWatchEmployees: (navigation: NavigationScreenProp<any>) => void;
-  dispatchEditEmployee: any;
+  dispatchEditEmployee: (
+    employee: IEmployee<string>,
+    navigation: NavigationScreenProp<any>,
+  ) => void;
   employeesAction: AsyncValue<{ [uid: string]: IEmployee<string> }>;
 }
 

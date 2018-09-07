@@ -1,9 +1,10 @@
 import "jest-enzyme";
 import React from "react";
 
-import { shallow } from "enzyme";
+import { shallow, ShallowWrapper } from "enzyme";
 import { ScrollView } from "react-native";
 import reactNativeCommunications from "react-native-communications";
+import { NavigationScreenProps } from "react-navigation";
 
 import { stubNavigation } from "../../helpers/react-navigation";
 import { StubbedStore } from "../../helpers/redux";
@@ -34,7 +35,7 @@ jest.mock(
 const { navigationOptions } = EditEmployee as any;
 
 describe("EmployeeList", () => {
-  let props: any;
+  let props: NavigationScreenProps;
   let store: StubbedStore;
   let state: { employee: IEmployeeState };
   beforeEach(() => {
@@ -79,7 +80,7 @@ describe("EmployeeList", () => {
   });
 
   describe("save button", () => {
-    let button: any;
+    let button: ShallowWrapper;
     beforeEach(() => {
       button = mkWrapper().find({ label: "Save" });
     });
@@ -121,7 +122,7 @@ describe("EmployeeList", () => {
   });
 
   describe("fire button", () => {
-    let button: any;
+    let button: ShallowWrapper;
     beforeEach(() => {
       button = mkWrapper().find({ label: "Fire" });
     });
@@ -141,7 +142,7 @@ describe("EmployeeList", () => {
   });
 
   describe("fire employee confirmation modal", () => {
-    let modal: any;
+    let modal: ShallowWrapper;
     beforeEach(() => {
       modal = mkWrapper().find("Confirm");
     });

@@ -3,6 +3,7 @@ import React from "react";
 
 import { shallow } from "enzyme";
 import { TouchableOpacity } from "react-native";
+import { NavigationScreenProps } from "react-navigation";
 import { Provider } from "react-redux";
 import reactTestRenderer from "react-test-renderer";
 
@@ -30,7 +31,7 @@ jest.mock("TouchableOpacity", () => "TouchableOpacity");
 const { navigationOptions } = EmployeeList as any;
 
 describe("EmployeeList", () => {
-  let props: any;
+  let props: NavigationScreenProps;
   let store: StubbedStore;
   let state: { employees: IEmployeesState };
   beforeEach(() => {
@@ -76,7 +77,7 @@ describe("EmployeeList", () => {
       uid: "uid1",
     };
     const bar = { ...foo, employeeName: "bar", uid: "uid2" };
-    let component: any;
+    let component: reactTestRenderer.ReactTestRenderer;
     beforeEach(() => {
       state.employees = {
         employeesAction: {

@@ -4,6 +4,7 @@ import React from "react";
 import { shallow } from "enzyme";
 
 import { Spinner, SpinnerSize } from "../../../src/components/common";
+import { IProps } from "../../../src/components/common/Spinner";
 
 // Some components show up in snapshots as <Component> if we don't mock them
 jest.mock("react-native", () => ({
@@ -13,10 +14,10 @@ jest.mock("react-native", () => ({
 }));
 
 describe("Spinner", () => {
-  const defProps = {
+  const defProps: IProps = {
     size: SpinnerSize.Large,
   };
-  const mkWrapper = (propOverrides?: any) => {
+  const mkWrapper = (propOverrides?: Partial<IProps>) => {
     const props = { ...defProps, ...propOverrides };
     return shallow(<Spinner {...props} />);
   };

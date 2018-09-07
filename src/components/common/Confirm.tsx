@@ -4,7 +4,7 @@ import { Modal, StyleSheet, Text, View } from "react-native";
 import Button from "./Button";
 import CardSection from "./CardSection";
 
-interface IProps {
+export interface IProps {
   text: string;
   yesText?: string;
   noText?: string;

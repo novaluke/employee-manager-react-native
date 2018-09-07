@@ -3,7 +3,7 @@ import React from "react";
 
 import { shallow } from "enzyme";
 
-import { Confirm } from "../../../src/components/common";
+import Confirm, { IProps } from "../../../src/components/common/Confirm";
 
 // Some components show up in snapshots as <Component> if we don't mock them
 jest.mock("react-native", () => ({
@@ -14,7 +14,7 @@ jest.mock("react-native", () => ({
 }));
 
 describe("Confirm", () => {
-  const defProps = {
+  const defProps: IProps = {
     isVisible: false,
     noText: "No",
     onNo: jest.fn(),
@@ -22,7 +22,7 @@ describe("Confirm", () => {
     text: "Are you sure you want to do that?",
     yesText: "Yes",
   };
-  const mkWrapper = (propOverrides?: any) => {
+  const mkWrapper = (propOverrides?: Partial<IProps>) => {
     const props = { ...defProps, ...propOverrides };
     return shallow(<Confirm {...props} />);
   };

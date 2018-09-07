@@ -3,7 +3,7 @@ import React from "react";
 
 import { shallow } from "enzyme";
 
-import { Input } from "../../../src/components/common";
+import Input, { IProps } from "../../../src/components/common/Input";
 
 // Some components show up in snapshots as <Component> if we don't mock them
 jest.mock("react-native", () => ({
@@ -14,10 +14,10 @@ jest.mock("react-native", () => ({
 }));
 
 describe("Input", () => {
-  const defProps = {
+  const defProps: IProps = {
     label: "Enter text here",
   };
-  const mkWrapper = (propOverrides?: any) => {
+  const mkWrapper = (propOverrides?: Partial<IProps>) => {
     const props = { ...defProps, ...propOverrides };
     return shallow(<Input {...props} />);
   };
@@ -27,11 +27,12 @@ describe("Input", () => {
   });
 
   it("passes all props down to the TextInput", () => {
-    const props = { foo: "bar" };
+    const propName = "autoFocus";
+    const props = { [propName]: true };
     expect(
       mkWrapper(props)
         .find("TextInput")
-        .prop("foo"),
-    ).toEqual(props.foo);
+        .prop(propName),
+    ).toEqual(props[propName]);
   });
 });

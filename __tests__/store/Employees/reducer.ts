@@ -1,6 +1,7 @@
 import "jest-enzyme";
 
 import { AsyncValue } from "../../../src/store";
+import { IEmployee, ShiftDay } from "../../../src/store/Employee";
 import {
   EmployeesActionType,
   employeesReducer as reducer,
@@ -10,10 +11,17 @@ import {
 
 describe("Employees reducer", () => {
   let testState: IEmployeesState;
+  let testEmployee: IEmployee<string>;
   beforeEach(() => {
     testState = {
       employeesAction: { state: "PROGRESS" } as AsyncValue<any>,
       unsubscribe: jest.fn(),
+    };
+    testEmployee = {
+      employeeName: "Taylor",
+      phone: "555-5555",
+      shift: ShiftDay.Friday,
+      uid: "uid1",
     };
   });
 
@@ -99,7 +107,7 @@ describe("Employees reducer", () => {
       it("sets the data as empty if the return value is null", () => {
         testState.employeesAction = {
           state: "COMPLETE",
-          value: { foo: "bar" } as any,
+          value: { foo: testEmployee },
         };
         const state = reducer(testState, {
           payload: { val: jest.fn(() => null) } as any,

@@ -23,9 +23,10 @@ export enum AuthActionType {
 
 type AuthDispatch = Dispatch<AuthAction>;
 
-const loginSuccess = (dispatch: AuthDispatch, navigate: any) => (
-  user: firebase.auth.UserCredential,
-) => {
+const loginSuccess = (
+  dispatch: AuthDispatch,
+  navigate: NavigationScreenProp<any>["navigate"],
+) => (user: firebase.auth.UserCredential) => {
   dispatch(createAction(AuthActionType.LOGIN_SUCCESS, user));
   navigate("Main");
 };

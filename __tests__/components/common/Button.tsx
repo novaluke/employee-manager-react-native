@@ -4,22 +4,18 @@ import React from "react";
 import { shallow } from "enzyme";
 import reactTestRenderer from "react-test-renderer";
 
-import { Button } from "../../../src/components/common";
+import Button, { IProps } from "../../../src/components/common/Button";
 
 describe("Button", () => {
-  const defProps = { onPress: jest.fn() };
-  const mkWrapper = (propOverrides?: any) => {
+  const defProps: IProps = { onPress: jest.fn() };
+  const mkWrapper = (propOverrides?: Partial<IProps>) => {
     const props = { ...defProps, ...propOverrides };
     return shallow(<Button {...props} />);
   };
 
-  let wrapper: any;
-  beforeEach(() => {
-    wrapper = mkWrapper();
-  });
-
   it("triggers `onPress` on press", () => {
     const { onPress } = defProps;
+    const wrapper = mkWrapper();
     expect(onPress).not.toHaveBeenCalled();
 
     wrapper.simulate("press");

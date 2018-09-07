@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
 });
 
-interface IProps extends TextInputProps {
+export interface IProps extends TextInputProps {
   label: string;
 }
 

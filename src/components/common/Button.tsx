@@ -20,6 +20,10 @@ const styles = StyleSheet.create({
   },
 });
 
+export interface IProps {
+  onPress: () => void;
+}
+
 const Button: React.SFC<{ onPress: () => void }> = ({ onPress, children }) => {
   const { buttonStyle, textStyle } = styles;
   return (

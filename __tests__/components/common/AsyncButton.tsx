@@ -3,7 +3,7 @@ import React from "react";
 
 import { Text } from "react-native";
 
-import { shallow } from "enzyme";
+import { shallow, ShallowWrapper } from "enzyme";
 
 import {
   AsyncButton,
@@ -11,22 +11,23 @@ import {
   Spinner,
   SpinnerSize,
 } from "../../../src/components/common";
+import { IProps } from "../../../src/components/common/AsyncButton";
 import { AsyncValue } from "../../../src/store";
 
 describe("AsyncButton", () => {
-  const defProps = {
+  const defProps: IProps = {
     asyncAction: { state: "INIT" },
     label: "Click me",
     onPress: jest.fn(),
     size: SpinnerSize.Small,
   };
-  const mkWrapper = (propOverrides?: any) => {
+  const mkWrapper = (propOverrides?: Partial<IProps>) => {
     const props = { ...defProps, ...propOverrides };
     return shallow(<AsyncButton {...props} />);
   };
 
   describe("when asyncAction is 'INIT'", () => {
-    let wrapper: any;
+    let wrapper: ShallowWrapper;
     beforeEach(() => {
       wrapper = mkWrapper();
     });
@@ -61,7 +62,7 @@ describe("AsyncButton", () => {
   });
 
   describe("when asyncAction is 'PROGRESS'", () => {
-    let wrapper: any;
+    let wrapper: ShallowWrapper;
     beforeEach(() => {
       wrapper = mkWrapper({ asyncAction: { state: "PROGRESS" } });
     });
@@ -80,7 +81,7 @@ describe("AsyncButton", () => {
   });
 
   describe("when asyncAction is 'ERROR'", () => {
-    let wrapper: any;
+    let wrapper: ShallowWrapper;
     const errText = "Something went wrong!";
     beforeEach(() => {
       wrapper = mkWrapper({ asyncAction: { state: "ERROR", error: errText } });
@@ -108,7 +109,7 @@ describe("AsyncButton", () => {
     it("is the same as when asyncAction is 'INIT'", () => {
       const completeProps = {
         ...defProps,
-        asyncAction: { state: "COMPLETE", value: "" } as AsyncValue<any>,
+        asyncAction: { state: "COMPLETE", value: "" } as AsyncValue<string>,
       };
       const initWrapper = mkWrapper({ asyncAction: { state: "INIT" } });
       const completeComponent = <AsyncButton {...completeProps} />;

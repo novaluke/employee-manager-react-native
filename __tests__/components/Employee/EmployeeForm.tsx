@@ -1,7 +1,8 @@
 import "jest-enzyme";
 import React from "react";
 
-import { shallow } from "enzyme";
+import { shallow, ShallowWrapper } from "enzyme";
+import { NavigationScreenProps } from "react-navigation";
 
 import { stubNavigation } from "../../helpers/react-navigation";
 import { StubbedStore } from "../../helpers/redux";
@@ -16,7 +17,7 @@ import {
 jest.mock("../../../src/store/Employee");
 
 describe("EmployeeForm", () => {
-  let props: any;
+  let props: NavigationScreenProps;
   let store: StubbedStore;
   let state: { employee: IEmployeeState };
   beforeEach(() => {
@@ -45,7 +46,7 @@ describe("EmployeeForm", () => {
     }).dive();
 
   describe("employee name input", () => {
-    let input: any;
+    let input: ShallowWrapper;
     beforeEach(() => {
       input = mkWrapper().find({ label: "Name" });
     });
@@ -68,7 +69,7 @@ describe("EmployeeForm", () => {
   });
 
   describe("phone number input", () => {
-    let input: any;
+    let input: ShallowWrapper;
     beforeEach(() => {
       input = mkWrapper().find({ label: "Phone" });
     });
@@ -91,7 +92,7 @@ describe("EmployeeForm", () => {
   });
 
   describe("shift input", () => {
-    let input: any;
+    let input: ShallowWrapper;
     beforeEach(() => {
       input = mkWrapper().find("Picker");
     });
@@ -112,9 +113,7 @@ describe("EmployeeForm", () => {
       expect(input.prop("selectedValue")).toEqual(state.employee.shift);
     });
     it("provides options matching the ShiftDay enum", () => {
-      const values = input
-        .find("PickerItem")
-        .map((item: any) => item.prop("value"));
+      const values = input.find("PickerItem").map(item => item.prop("value"));
       expect(values.sort()).toEqual(Object.keys(ShiftDay).sort());
     });
   });

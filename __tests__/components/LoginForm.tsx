@@ -2,6 +2,7 @@ import "jest-enzyme";
 import React from "react";
 
 import { shallow } from "enzyme";
+import { NavigationScreenProps } from "react-navigation";
 
 import { stubNavigation } from "../helpers/react-navigation";
 import { StubbedStore } from "../helpers/redux";
@@ -18,7 +19,7 @@ import {
 jest.mock("../../src/store/Auth");
 
 describe("LoginForm", () => {
-  let stubbedProps: any;
+  let props: NavigationScreenProps;
   let store: StubbedStore;
   let state: { auth: IAuthState };
   beforeEach(() => {
@@ -31,14 +32,14 @@ describe("LoginForm", () => {
       },
     };
     store = new StubbedStore(state);
-    stubbedProps = {
+    props = {
       navigation: stubNavigation(),
     };
   });
   // This has side effects! Don't put this in beforeEach in case a test needs to
   // do something *before* running those side effects!
   const mkWrapper = () =>
-    shallow(<LoginForm {...stubbedProps} />, {
+    shallow(<LoginForm {...props} />, {
       context: { store },
     }).dive();
 
@@ -76,7 +77,7 @@ describe("LoginForm", () => {
     expect(logIn).toHaveBeenCalledWith(
       state.auth.email,
       state.auth.password,
-      stubbedProps.navigation,
+      props.navigation,
     );
   });
 
