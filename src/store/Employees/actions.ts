@@ -1,8 +1,10 @@
 import firebase from "firebase";
-import { NavigationScreenProp } from "react-navigation";
-import { Dispatch } from "redux";
+import { ofType } from "redux-observable";
+import { empty, Observable } from "rxjs";
+import { map, switchAll } from "rxjs/operators";
 import { action as createAction } from "typesafe-actions";
 
+import { firebaseOn } from "../common/Firebase";
 import { IEmployee } from "../Employee";
 
 export enum EmployeesActionType {
@@ -12,42 +14,37 @@ export enum EmployeesActionType {
 }
 
 export type EmployeesAction =
-  | { type: EmployeesActionType.WATCH_START; payload: () => void }
+  | { type: EmployeesActionType.WATCH_START }
   | { type: EmployeesActionType.UNSUBSCRIBE }
   | {
       type: EmployeesActionType.EMPLOYEES_FETCHED;
       payload: { [uid: string]: IEmployee<string> } | null;
     };
 
-type EmployeesDispatch = Dispatch<EmployeesAction>;
-
 export const unwatchEmployees = () =>
   createAction(EmployeesActionType.UNSUBSCRIBE);
 
-export const watchEmployees = (navigation: NavigationScreenProp<any>) => (
-  dispatch: EmployeesDispatch,
-) => {
-  const { currentUser } = firebase.auth();
-  if (currentUser === null) {
-    navigation.navigate("Auth");
-    return () => null;
-  }
-  const refString = `/users/${currentUser.uid}/employees`;
-  const onEmployeesFetched = (snapshot: firebase.database.DataSnapshot) =>
-    dispatch({
-      payload: snapshot.val(),
-      type: EmployeesActionType.EMPLOYEES_FETCHED,
-    });
-  const unsubscribe = () =>
-    firebase
-      .database()
-      .ref(refString)
-      .off("value", onEmployeesFetched);
+export const watchEmployees = () =>
+  createAction(EmployeesActionType.WATCH_START);
 
-  dispatch(createAction(EmployeesActionType.WATCH_START, unsubscribe));
-  firebase
-    .database()
-    .ref(refString)
-    .on("value", onEmployeesFetched);
-  return onEmployeesFetched;
-};
+export const employeesSubscriptionEpic = (
+  action$: Observable<EmployeesAction>,
+): Observable<EmployeesAction> =>
+  action$.pipe(
+    ofType(EmployeesActionType.WATCH_START, EmployeesActionType.UNSUBSCRIBE),
+    map(action => {
+      const { currentUser } = firebase.auth();
+      if (
+        currentUser !== null &&
+        action.type === EmployeesActionType.WATCH_START
+      ) {
+        return firebaseOn(`/users/${currentUser.uid}/employees`);
+      }
+      return empty();
+    }),
+    switchAll(),
+    map<any, EmployeesAction>(payload => ({
+      payload,
+      type: EmployeesActionType.EMPLOYEES_FETCHED,
+    })),
+  );

@@ -38,7 +38,6 @@ describe("EmployeeList", () => {
     state = {
       employees: {
         employeesAction: { state: "INIT" },
-        unsubscribe: jest.fn(),
       },
     };
     store = new StubbedStore(state);
@@ -84,7 +83,6 @@ describe("EmployeeList", () => {
           state: "COMPLETE",
           value: { foo, bar },
         },
-        unsubscribe: jest.fn(),
       };
       component = reactTestRenderer.create(
         <Provider store={store}>

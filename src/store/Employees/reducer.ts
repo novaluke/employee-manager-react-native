@@ -7,12 +7,10 @@ import { EmployeesAction, EmployeesActionType } from "./actions";
 
 export interface IEmployeesState {
   employeesAction: AsyncValue<{ [uid: string]: IEmployee<string> }>;
-  unsubscribe: (() => void) | null;
 }
 
 export const INITIAL_STATE: IEmployeesState = {
   employeesAction: { state: "INIT" },
-  unsubscribe: null,
 };
 
 export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
@@ -21,18 +19,8 @@ export const employeesReducer: Reducer<IEmployeesState, EmployeesAction> = (
 ) => {
   switch (action.type) {
     case EmployeesActionType.WATCH_START:
-      if (state.unsubscribe) {
-        state.unsubscribe();
-      }
-      return {
-        ...state,
-        employeesAction: { state: "PROGRESS" },
-        unsubscribe: action.payload,
-      };
+      return { ...state, employeesAction: { state: "PROGRESS" } };
     case EmployeesActionType.UNSUBSCRIBE:
-      if (state.unsubscribe) {
-        state.unsubscribe();
-      }
       return { ...state, employeesAction: { state: "INIT" } };
     case EmployeesActionType.EMPLOYEES_FETCHED:
       return {

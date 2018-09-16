@@ -1,15 +1,24 @@
 import { applyMiddleware, combineReducers, createStore, Store } from "redux";
+import { combineEpics, createEpicMiddleware } from "redux-observable";
 import reduxThunk from "redux-thunk";
 
 import { AuthAction, authReducer, IAuthState } from "./Auth";
 import { employeeReducer, IEmployeeState } from "./Employee";
-import { employeesReducer, IEmployeesState } from "./Employees";
+import {
+  employeesReducer,
+  employeesSubscriptionEpic,
+  IEmployeesState,
+} from "./Employees";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   employee: employeeReducer,
   employees: employeesReducer,
 });
+
+const rootEpic = combineEpics(employeesSubscriptionEpic);
+
+const epicMiddleware = createEpicMiddleware();
 
 export interface IRootState {
   auth: IAuthState;
@@ -20,8 +29,10 @@ export interface IRootState {
 export const store: Store<IRootState, RootAction> = createStore(
   rootReducer,
   {},
-  applyMiddleware(reduxThunk),
+  applyMiddleware(reduxThunk, epicMiddleware),
 );
+
+epicMiddleware.run(rootEpic);
 
 export type RootAction = AuthAction;
 export * from "./common/Async";

@@ -15,7 +15,6 @@ describe("Employees reducer", () => {
   beforeEach(() => {
     testState = {
       employeesAction: { state: "PROGRESS" } as AsyncValue<any>,
-      unsubscribe: jest.fn(),
     };
     testEmployee = {
       employeeName: "Taylor",
@@ -42,38 +41,13 @@ describe("Employees reducer", () => {
 
         expect(testState.employeesAction).not.toEqual(expectedAction);
         const state = reducer(testState, {
-          payload: () => null,
           type: EmployeesActionType.WATCH_START,
         });
 
         expect(state).toEqual({
           ...testState,
           employeesAction: expectedAction,
-          unsubscribe: expect.any(Function),
         });
-      });
-
-      it("updates the unsubscribe function", () => {
-        const unsubscribeFn = jest.fn();
-
-        const state = reducer(testState, {
-          payload: unsubscribeFn,
-          type: EmployeesActionType.WATCH_START,
-        });
-
-        expect(state.unsubscribe).toBe(unsubscribeFn);
-      });
-
-      it("calls the previous unsubscribe function", () => {
-        // Only allow one watcher in order to keep resource use clean
-        testState.unsubscribe = jest.fn();
-
-        reducer(testState, {
-          payload: () => null,
-          type: EmployeesActionType.WATCH_START,
-        });
-
-        expect(testState.unsubscribe).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -137,15 +111,6 @@ describe("Employees reducer", () => {
       });
 
       expect(state).toEqual({ ...testState, employeesAction: expectedAction });
-    });
-
-    it("calls the unsubscribe function", () => {
-      const { unsubscribe } = testState;
-
-      expect(unsubscribe).not.toHaveBeenCalled();
-      reducer(testState, { type: EmployeesActionType.UNSUBSCRIBE });
-
-      expect(unsubscribe).toHaveBeenCalledTimes(1);
     });
   });
 });
