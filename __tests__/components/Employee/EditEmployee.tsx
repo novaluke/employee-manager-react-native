@@ -34,7 +34,7 @@ jest.mock(
 // override the types here until a better solution can be found.
 const { navigationOptions } = EditEmployee as any;
 
-describe("EmployeeList", () => {
+describe("EditEmployee", () => {
   let props: NavigationScreenProps;
   let store: StubbedStore;
   let state: { employee: IEmployeeState };
