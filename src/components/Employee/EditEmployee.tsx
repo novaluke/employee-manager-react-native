@@ -27,10 +27,7 @@ interface IProps extends IFormProps, NavigationScreenProps {
   fireModalShown: boolean;
   updateAction: AsyncValue<null>;
   dispatchShowFireModal: () => void;
-  dispatchUpdateEmployee: (
-    employee: IEmployee<string | null>,
-    navigation: NavigationScreenProp<any>,
-  ) => void;
+  dispatchUpdateEmployee: (employee: IEmployee<string>) => void;
   dispatchResetForm: () => void;
   dispatchCloseModal: () => void;
   dispatchFireEmployee: (
@@ -71,17 +68,20 @@ class EditEmployee extends Component<IProps> {
       dispatchFireEmployee,
       navigation,
     } = this.props;
+    // Short-circuit and redirect if the employee to edit has not actually been
+    // saved yet (can't edit something non-persisted)
+    if (uid === null) {
+      navigation.navigate("EmployeeList");
+      return null;
+    }
     const onFireEmployee = () => dispatchFireEmployee(uid, navigation);
     const onUpdateEmployee = () =>
-      dispatchUpdateEmployee(
-        {
-          employeeName,
-          phone,
-          shift,
-          uid,
-        },
-        navigation,
-      );
+      dispatchUpdateEmployee({
+        employeeName,
+        phone,
+        shift,
+        uid,
+      });
     return (
       <ScrollView>
         <Card>

@@ -67,6 +67,14 @@ describe("EditEmployee", () => {
     expect(mkWrapper().type()).toBe(ScrollView);
   });
 
+  it("redirects to the employee list if the employee has not been saved yet", () => {
+    state.employee.uid = null;
+
+    mkWrapper();
+
+    expect(props.navigation.navigate).toHaveBeenCalledWith("EmployeeList");
+  });
+
   it("passes dispatchFieldUpdate to the EmployeeForm", () => {
     // Need to use the actual component type rather than a string or we lose
     // type safety
@@ -97,10 +105,12 @@ describe("EditEmployee", () => {
       button.simulate("press");
 
       expect(updateEmployee).toHaveBeenCalledTimes(1);
-      expect(updateEmployee).toHaveBeenCalledWith(
-        { employeeName, phone, shift, uid },
-        props.navigation,
-      );
+      expect(updateEmployee).toHaveBeenCalledWith({
+        employeeName,
+        phone,
+        shift,
+        uid,
+      });
     });
   });
 

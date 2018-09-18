@@ -7,6 +7,7 @@ import {
   createEmployeeEpic,
   employeeReducer,
   IEmployeeState,
+  updateEmployeeEpic,
 } from "./Employee";
 import {
   employeesReducer,
@@ -20,7 +21,11 @@ const rootReducer = combineReducers({
   employees: employeesReducer,
 });
 
-const rootEpic = combineEpics(createEmployeeEpic, employeesSubscriptionEpic);
+const rootEpic = combineEpics(
+  createEmployeeEpic,
+  updateEmployeeEpic,
+  employeesSubscriptionEpic,
+);
 
 const epicMiddleware = createEpicMiddleware();
 
