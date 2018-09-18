@@ -3,7 +3,11 @@ import * as React from "react";
 import { View } from "react-native";
 
 import firebase from "firebase";
-import { createStackNavigator, createSwitchNavigator } from "react-navigation";
+import {
+  createStackNavigator,
+  createSwitchNavigator,
+  NavigationContainerComponent,
+} from "react-navigation";
 import { Provider } from "react-redux";
 
 import firebaseConfigJson from "../firebaseConfig.json";
@@ -14,6 +18,8 @@ import EditEmployee from "./components/Employee/EditEmployee";
 import EmployeeList from "./components/Employee/EmployeeList";
 import InitializingScreen from "./components/InitializingScreen";
 import LoginForm from "./components/LoginForm";
+
+import { setNavigation } from "./NavigationService";
 
 const MainStackNavigator = createStackNavigator(
   {
@@ -45,7 +51,11 @@ class App extends React.Component {
     return (
       <Provider store={store}>
         <View style={{ flex: 1 }}>
-          <RootNavigator />
+          <RootNavigator
+            ref={(x: NavigationContainerComponent | null) =>
+              x && setNavigation(x)
+            }
+          />
         </View>
       </Provider>
     );

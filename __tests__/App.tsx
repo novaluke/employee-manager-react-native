@@ -8,9 +8,11 @@ import { create } from "react-test-renderer";
 import firebaseConfigJson from "../firebaseConfig.json";
 import App from "../src/App";
 
+import { setNavigation } from "../src/NavigationService";
 import { store } from "../src/store";
 
 jest.mock("../src/components/InitializingScreen", () => "InitializingScreen");
+jest.mock("../src/NavigationService");
 jest.unmock("firebase");
 
 afterEach(() =>
@@ -33,6 +35,17 @@ describe("root App component", () => {
     );
   });
 
+  it("sets the navigation component", () => {
+    const renderer = create(<App />);
+    // Can't test that it was called with the right argument as there isn't a
+    // way to access the <RootNavigator> component with the test renderers, so
+    // it's not possible to check that the arg matches that commponent
+    expect(setNavigation).toHaveBeenCalled();
+
+    // Clean up to avoid warnings from react-navigation
+    renderer.unmount();
+  });
+
   it("doesn't attempt to initialize firebase if it's already initialized", () => {
     firebase.initializeApp({});
     firebase.initializeApp = jest.fn();
@@ -43,7 +56,10 @@ describe("root App component", () => {
   });
 
   it("loads InitializingScreen as the initial screen", () => {
-    const { root } = create(<App />);
-    expect(root.findAllByType("InitializingScreen").length).toBe(1);
+    const renderer = create(<App />);
+    expect(renderer.root.findAllByType("InitializingScreen").length).toBe(1);
+
+    // Clean up to avoid warnings from react-navigation
+    renderer.unmount();
   });
 });
