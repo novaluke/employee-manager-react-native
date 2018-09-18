@@ -6,6 +6,7 @@ import { toArray } from "rxjs/operators";
 import {
   firebaseOn,
   firebasePush,
+  firebaseRemove,
   firebaseSet,
 } from "../../../src/store/common/Firebase";
 
@@ -207,6 +208,74 @@ describe("firebase helpers", () => {
           });
 
           rejectSet(error);
+        });
+      });
+    });
+  });
+
+  describe("firebaseRemove", () => {
+    const mockRef = jest.fn();
+    const mockRemove = jest.fn();
+    const refPath = "foo";
+    let resolveRemove: (x: any) => void;
+    let rejectRemove: (x: any) => void;
+    beforeEach(() => {
+      (firebase.database as any).mockImplementation(() => ({ ref: mockRef }));
+      mockRef.mockImplementation(() => ({ remove: mockRemove }));
+      mockRemove.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            resolveRemove = resolve;
+            rejectRemove = reject;
+          }),
+      );
+    });
+
+    describe("when subscribed to", () => {
+      it("removes the item at the given firebase refPath", () => {
+        firebaseRemove(refPath).subscribe(jest.fn());
+
+        expect(mockRef).toHaveBeenCalledTimes(1);
+        expect(mockRef).toHaveBeenCalledWith(refPath);
+
+        expect(mockRemove).toHaveBeenCalledTimes(1);
+      });
+
+      describe("when remove is successful", () => {
+        it("emits the result", done => {
+          const result = { bar: "bar" };
+          firebaseRemove(refPath)
+            .pipe(toArray())
+            .subscribe(results => {
+              expect(results).toEqual([result]);
+              done();
+            });
+          resolveRemove(result);
+        });
+
+        it("completes the stream", done => {
+          // No expectations here since the only requirement is that it reaches
+          // `done` - if it doesn't, it will fail due to timeout
+          firebaseRemove(refPath)
+            .toPromise()
+            .then(done);
+
+          resolveRemove(null);
+        });
+      });
+
+      describe("when remove is unsuccessful", () => {
+        it("emits the error from set", done => {
+          const error = { reason: "For science!" };
+
+          firebaseRemove(refPath).subscribe({
+            error: e => {
+              expect(e).toBe(error);
+              done();
+            },
+          });
+
+          rejectRemove(error);
         });
       });
     });
