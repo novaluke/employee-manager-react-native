@@ -21,3 +21,24 @@ export function firebaseOn(
     },
   );
 }
+
+export function firebasePush(
+  refPath: string,
+  payload: any,
+): Observable<firebase.database.Reference> {
+  return Observable.create(
+    (observer: Observer<firebase.database.Reference>): TeardownLogic => {
+      firebase
+        .database()
+        .ref(refPath)
+        .push(payload)
+        // Can't pass the observer functions directly or else they throw errors
+        // for some reason
+        .then(
+          (x: firebase.database.Reference) => observer.next(x),
+          e => observer.error(e),
+        )
+        .then(() => observer.complete());
+    },
+  );
+}

@@ -1,8 +1,9 @@
 import "jest-enzyme";
 
 import firebase from "firebase";
+import { toArray } from "rxjs/operators";
 
-import { firebaseOn } from "../../../src/store/common/Firebase";
+import { firebaseOn, firebasePush } from "../../../src/store/common/Firebase";
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -64,6 +65,76 @@ describe("firebase helpers", () => {
       returnHandler(snapshot(secondItem));
 
       expect(results).toEqual([firstItem, secondItem]);
+    });
+  });
+
+  describe("firebasePush", () => {
+    const mockRef = jest.fn();
+    const mockPush = jest.fn();
+    const refPath = "foo";
+    const payload = { foo: "foo" };
+    let resolvePush: (x: any) => void;
+    let rejectPush: (x: any) => void;
+    beforeEach(() => {
+      (firebase.database as any).mockImplementation(() => ({ ref: mockRef }));
+      mockRef.mockImplementation(() => ({ push: mockPush }));
+      mockPush.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            resolvePush = resolve;
+            rejectPush = reject;
+          }),
+      );
+    });
+
+    describe("when subscribed to", () => {
+      it("pushes the payload to the firebase refPath", () => {
+        firebasePush(refPath, payload).subscribe(jest.fn());
+
+        expect(mockRef).toHaveBeenCalledTimes(1);
+        expect(mockRef).toHaveBeenCalledWith(refPath);
+
+        expect(mockPush).toHaveBeenCalledTimes(1);
+        expect(mockPush).toHaveBeenCalledWith(payload);
+      });
+
+      describe("when push is successful", () => {
+        it("emits the result", done => {
+          const result = { bar: "bar" };
+          firebasePush(refPath, payload)
+            .pipe(toArray())
+            .subscribe(results => {
+              expect(results).toEqual([result]);
+              done();
+            });
+          resolvePush(result);
+        });
+
+        it("completes the stream", done => {
+          // No expectations here since the only requirement is that it reaches
+          // `done` - if it doesn't, it will fail due to timeout
+          firebasePush(refPath, payload)
+            .toPromise()
+            .then(done);
+
+          resolvePush(null);
+        });
+      });
+
+      describe("when push is unsuccessful", () => {
+        it("emits the error from push", done => {
+          const error = { reason: "For science!" };
+
+          firebasePush(refPath, payload).subscribe({
+            error: e => {
+              expect(e).toBe(error);
+              done();
+            },
+          });
+
+          rejectPush(error);
+        });
+      });
     });
   });
 });
