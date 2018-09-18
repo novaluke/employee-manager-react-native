@@ -479,7 +479,6 @@ describe("fireEmployeeEpic", () => {
 describe("Employee actions", () => {
   let testEmployee: IEmployee<string>;
   let navigation: NavigationScreenProp<any>;
-  const dispatch = jest.fn();
   beforeEach(() => {
     testEmployee = {
       employeeName: "Taylor",
@@ -515,13 +514,10 @@ describe("Employee actions", () => {
 
   describe("editEmployee", () => {
     const runAction = (employee: IEmployee<string>) =>
-      editEmployee(employee, navigation)(dispatch);
+      editEmployee(employee, navigation);
 
-    it("dispatches the edit action with the employee as payload", () => {
-      runAction(testEmployee);
-
-      expect(dispatch).toHaveBeenCalledTimes(1);
-      expect(dispatch).toHaveBeenCalledWith({
+    it("creates the edit action with the employee as payload", () => {
+      expect(runAction(testEmployee)).toEqual({
         payload: testEmployee,
         type: EmployeeActionType.EDIT,
       });

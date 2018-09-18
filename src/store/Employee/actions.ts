@@ -1,6 +1,5 @@
 import firebase from "firebase";
 import { NavigationScreenProp } from "react-navigation";
-import { Dispatch } from "redux";
 import { ofType } from "redux-observable";
 import { empty, Observable, of, pipe } from "rxjs";
 import { catchError, concat, map, mapTo, switchAll, tap } from "rxjs/operators";
@@ -54,8 +53,6 @@ export type EmployeeAction =
       type: EmployeeActionType.FIRE_ACTION;
       payload: Action<string, null, IEmployeeState>;
     };
-
-type EmployeeDispatch = Dispatch<EmployeeAction>;
 
 export const updateField = (payload: FieldUpdatePayload) =>
   createAction(EmployeeActionType.UPDATE_FIELD, payload);
@@ -111,9 +108,9 @@ export const createEmployeeEpic = (
 export const editEmployee = (
   employee: IEmployee<string>,
   navigation: NavigationScreenProp<any>,
-) => (dispatch: EmployeeDispatch) => {
-  dispatch(createAction(EmployeeActionType.EDIT, employee));
+) => {
   navigation.navigate("EditEmployee", { employeeName: employee.employeeName });
+  return createAction(EmployeeActionType.EDIT, employee);
 };
 
 export const resetForm = () => createAction(EmployeeActionType.RESET);
