@@ -1,11 +1,16 @@
 import firebase from "firebase";
 import { NavigationScreenProp } from "react-navigation";
 import { Dispatch } from "redux";
+import { ofType } from "redux-observable";
+import { empty, Observable, of, pipe } from "rxjs";
+import { catchError, concat, map, mapTo, switchAll, tap } from "rxjs/operators";
 import { action as createAction } from "typesafe-actions";
 
 import { IEmployee, IEmployeeState, ShiftDay } from "./reducer";
 
+import { navigate } from "../../NavigationService";
 import { Action } from "../common/Async";
+import { firebasePush } from "../common/Firebase";
 
 export enum EmployeeActionType {
   UPDATE_FIELD = "UPDATE_FIELD",
@@ -13,6 +18,7 @@ export enum EmployeeActionType {
   RESET = "RESET",
   SHOW_MODAL = "SHOW_MODAL",
   CLOSE_MODAL = "CLOSE_MODAL",
+  CREATE_EMPLOYEE = "CREATE_EMPLOYEE",
   CREATE_ACTION = "CREATE_ACTION",
   UPDATE_ACTION = "UPDATE_ACTION",
   FIRE_ACTION = "FIRE_ACTION",
@@ -31,6 +37,7 @@ export type EmployeeAction =
   | { type: EmployeeActionType.RESET }
   | { type: EmployeeActionType.SHOW_MODAL }
   | { type: EmployeeActionType.CLOSE_MODAL }
+  | { type: EmployeeActionType.CREATE_EMPLOYEE; payload: IEmployee<null> }
   | {
       type: EmployeeActionType.CREATE_ACTION;
       payload: Action<string, null, IEmployeeState>;
@@ -49,49 +56,53 @@ type EmployeeDispatch = Dispatch<EmployeeAction>;
 export const updateField = (payload: FieldUpdatePayload) =>
   createAction(EmployeeActionType.UPDATE_FIELD, payload);
 
-const createSuccess = (
-  dispatch: EmployeeDispatch,
-  navigate: NavigationScreenProp<any>["navigate"],
-) => () => {
-  navigate("EmployeeList");
-  dispatch({
+const handleCreateSuccess = pipe(
+  tap(() => navigate("EmployeeList")),
+  mapTo<any, EmployeeAction>({
     payload: Action.success(null),
     type: EmployeeActionType.CREATE_ACTION,
-  });
-};
+  }),
+);
 
-const createFail = (dispatch: EmployeeDispatch) => () =>
-  dispatch({
+const handleCreateFail = () =>
+  of<EmployeeAction>({
     payload: Action.failure(""),
     type: EmployeeActionType.CREATE_ACTION,
   });
 
-export const createEmployee = (
-  employee: IEmployee<null>,
-  navigation: NavigationScreenProp<any>,
-) => (dispatch: EmployeeDispatch) => {
-  const { currentUser } = firebase.auth();
-  if (currentUser === null) {
-    navigation.navigate("Auth");
-  } else {
-    dispatch({
-      payload: Action.start(),
-      type: EmployeeActionType.CREATE_ACTION,
-    });
-    return (
-      firebase
-        .database()
-        .ref(`/users/${currentUser.uid}/employees`)
-        .push(employee)
-        // Have to put error handler within `.then` due to Firebase idiosyncracity
-        .then(
-          createSuccess(dispatch, navigation.navigate),
-          createFail(dispatch),
-        )
-    );
-  }
-  return Promise.reject();
-};
+export const createEmployee = (employee: IEmployee<null>) =>
+  createAction(EmployeeActionType.CREATE_EMPLOYEE, employee);
+
+export const createEmployeeEpic = (
+  action$: Observable<EmployeeAction>,
+): Observable<EmployeeAction> =>
+  action$.pipe(
+    ofType(EmployeeActionType.CREATE_EMPLOYEE),
+    map(action => {
+      const { currentUser } = firebase.auth();
+      if (currentUser === null) {
+        navigate("Auth");
+      } else if (action.type === EmployeeActionType.CREATE_EMPLOYEE) {
+        // Still need the `if` even after `ofType` in order to narrow the type
+        // properly, unless we want to specify the type parameter in `ofType`,
+        // which is slightly more verbose than this `else if`
+        const { payload } = action;
+        return of<EmployeeAction>({
+          payload: Action.start(),
+          type: EmployeeActionType.CREATE_ACTION,
+        }).pipe(
+          concat(
+            firebasePush(`/users/${currentUser.uid}/employees`, payload).pipe(
+              handleCreateSuccess,
+              catchError(handleCreateFail),
+            ),
+          ),
+        );
+      }
+      return empty();
+    }),
+    switchAll(),
+  );
 
 export const editEmployee = (
   employee: IEmployee<string>,

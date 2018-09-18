@@ -2,6 +2,9 @@ import "jest-enzyme";
 
 import firebase from "firebase";
 import { NavigationScreenProp } from "react-navigation";
+import { of } from "rxjs";
+import { marbles } from "rxjs-marbles/jest";
+import { toArray } from "rxjs/operators";
 
 import { stubNavigation } from "../../helpers/react-navigation";
 
@@ -9,7 +12,9 @@ import { Action } from "../../../src/store/common/Async";
 import {
   closeFireModal,
   createEmployee,
+  createEmployeeEpic,
   editEmployee,
+  EmployeeAction,
   EmployeeActionType,
   fireEmployee,
   IEmployee,
@@ -20,8 +25,161 @@ import {
   updateField,
 } from "../../../src/store/Employee";
 
+import { navigate } from "../../../src/NavigationService";
+
+jest.mock("../../../src/NavigationService");
+
 beforeEach(() => {
   jest.resetAllMocks();
+});
+
+describe("createEmployeeEpic", () => {
+  let testAction: EmployeeAction;
+  let newEmployee: IEmployee<null>;
+  const mockUser = { uid: "uid1" };
+  const mockPush = jest.fn();
+  const mockRef = jest.fn();
+  beforeEach(() => {
+    newEmployee = {
+      employeeName: "Taylor",
+      phone: "555-5555",
+      shift: ShiftDay.Friday,
+      uid: null,
+    };
+    testAction = createEmployee(newEmployee);
+    (firebase.database as any).mockImplementation(() => ({ ref: mockRef }));
+    mockRef.mockImplementation(() => ({ push: mockPush }));
+    mockPush.mockImplementation(() => new Promise(() => null));
+  });
+
+  describe("when not logged in", () => {
+    beforeEach(() => {
+      (firebase.auth as any).mockImplementation(() => ({ currentUser: null }));
+    });
+
+    it(
+      "emits no actions",
+      marbles(m => {
+        const values = {
+          a: testAction,
+        };
+        const action$ = m.cold("-a-|", values);
+        const expected$ = "---|";
+
+        m.expect(createEmployeeEpic(action$)).toBeObservable(expected$);
+      }),
+    );
+
+    it("does not attempt to create the employee", () => {
+      const action$ = of(testAction);
+
+      createEmployeeEpic(action$).subscribe(jest.fn());
+
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it("redirects to the Auth route", () => {
+      const action$ = of(testAction);
+
+      createEmployeeEpic(action$).subscribe(jest.fn());
+
+      expect(navigate).toHaveBeenCalledWith("Auth");
+    });
+  });
+
+  describe("when logged in", () => {
+    beforeEach(() => {
+      (firebase.auth as any).mockImplementation(() => ({
+        currentUser: mockUser,
+      }));
+    });
+
+    describe("after CREATE_EMPLOYEE is dispatched", () => {
+      it(
+        "emits the creation request started action",
+        marbles(m => {
+          const values = {
+            a: testAction,
+            b: {
+              payload: Action.start(),
+              type: EmployeeActionType.CREATE_ACTION,
+            } as EmployeeAction,
+          };
+          const action$ = m.cold("  -a-", values);
+          const expected$ = m.cold("-b-", values);
+
+          m.expect(createEmployeeEpic(action$)).toBeObservable(expected$);
+        }),
+      );
+
+      it("sends a request to create the employee in firebase", () => {
+        const action$ = of(testAction);
+
+        createEmployeeEpic(action$).subscribe(jest.fn());
+
+        expect(mockRef).toHaveBeenCalledTimes(1);
+        expect(mockRef).toHaveBeenCalledWith(
+          `/users/${mockUser.uid}/employees`,
+        );
+
+        expect(mockPush).toHaveBeenCalledTimes(1);
+        expect(mockPush).toHaveBeenCalledWith(newEmployee);
+      });
+
+      describe("when creation is successful", () => {
+        beforeEach(() => {
+          mockPush.mockImplementation(() => Promise.resolve());
+        });
+
+        it("emits the creation successful action", done => {
+          const action$ = of(testAction);
+          const resultAction: EmployeeAction = {
+            payload: Action.success(null),
+            type: EmployeeActionType.CREATE_ACTION,
+          };
+
+          createEmployeeEpic(action$)
+            .pipe(toArray())
+            .subscribe(emitted => {
+              expect(emitted).toContainEqual(resultAction);
+              done();
+            });
+        });
+
+        it("navigates to the employee list route", done => {
+          const action$ = of(testAction);
+
+          createEmployeeEpic(action$).subscribe({
+            complete: () => {
+              expect(navigate).toHaveBeenCalledWith("EmployeeList");
+              done();
+            },
+          });
+        });
+      });
+
+      describe("when creation fails", () => {
+        beforeEach(() => {
+          mockPush.mockImplementation(() => Promise.reject());
+        });
+
+        it("emits the creation failed action", done => {
+          const action$ = of(testAction);
+          const resultAction: EmployeeAction = {
+            payload: Action.failure(expect.any(String)),
+            type: EmployeeActionType.CREATE_ACTION,
+          };
+
+          createEmployeeEpic(action$)
+            .pipe(toArray())
+            .subscribe(emitted => {
+              expect(emitted).toContainEqual(resultAction);
+              done();
+            });
+        });
+      });
+    });
+  });
 });
 
 describe("Employee actions", () => {
@@ -60,95 +218,13 @@ describe("Employee actions", () => {
   });
 
   describe("createEmployee", () => {
-    const runAction = (employee = { ...testEmployee, uid: null }) =>
-      createEmployee(employee, navigation)(dispatch);
-
-    describe("when not logged in", () => {
-      it("redirects to the Auth route", () => {
-        (firebase.auth as any).mockImplementation(() => ({
-          currentUser: null,
-        }));
-
-        expect(navigation.navigate).not.toHaveBeenCalled();
-        runAction();
-
-        expect(navigation.navigate).toHaveBeenCalledTimes(1);
-        expect(navigation.navigate).toHaveBeenCalledWith("Auth");
-      });
-    });
-
-    describe("when logged in", () => {
-      let refString: string;
-      const push = jest.fn();
-      const ref = jest.fn();
-      beforeEach(() => {
-        (firebase.auth as any).mockImplementation(() => ({
-          currentUser: user,
-        }));
-        (firebase.database as any).mockImplementation(() => ({ ref }));
-        ref.mockImplementation(() => ({ push }));
-        refString = `/users/${user.uid}/employees`;
-      });
-
-      it("dispatches the create started action", () => {
-        push.mockImplementation(() => Promise.resolve());
-
-        return runAction().then(() => {
-          expect(dispatch).toHaveBeenCalledWith({
-            payload: Action.start(),
-            type: EmployeeActionType.CREATE_ACTION,
-          });
-        });
-      });
-
-      it("adds the employee to firebase", () => {
-        const employee = { ...testEmployee, uid: null };
-        push.mockImplementation(() => Promise.resolve());
-
-        expect(ref).not.toHaveBeenCalled();
-        expect(push).not.toHaveBeenCalled();
-
-        return runAction(employee).then(() => {
-          expect(ref).toHaveBeenCalledTimes(1);
-          expect(ref).toHaveBeenCalledWith(refString);
-
-          expect(push).toHaveBeenCalledTimes(1);
-          expect(push).toHaveBeenCalledWith(employee);
-        });
-      });
-
-      describe("when creation succeeds", () => {
-        beforeEach(() => {
-          push.mockImplementation(() => Promise.resolve());
-        });
-
-        it("dispatches the creation success action", () =>
-          runAction().then(() => {
-            expect(dispatch).toHaveBeenCalledWith({
-              payload: Action.success(null),
-              type: EmployeeActionType.CREATE_ACTION,
-            });
-          }));
-
-        it("navigates to the employee list", () =>
-          runAction().then(() => {
-            expect(navigation.navigate).toHaveBeenCalledTimes(1);
-            expect(navigation.navigate).toHaveBeenCalledWith("EmployeeList");
-          }));
-      });
-
-      describe("when creation fails", () => {
-        it("dispatches the creation failure action", () => {
-          push.mockImplementation(() => Promise.reject());
-
-          return runAction().then(() => {
-            expect(dispatch).toHaveBeenCalledWith({
-              payload: Action.failure(expect.any(String)),
-              type: EmployeeActionType.CREATE_ACTION,
-            });
-          });
-        });
-      });
+    it("creates the action to create the given employee", () => {
+      const employee = { ...testEmployee, uid: null };
+      const expectedAction = {
+        payload: employee,
+        type: EmployeeActionType.CREATE_EMPLOYEE,
+      };
+      expect(createEmployee(employee)).toEqual(expectedAction);
     });
   });
 

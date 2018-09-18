@@ -3,7 +3,11 @@ import { combineEpics, createEpicMiddleware } from "redux-observable";
 import reduxThunk from "redux-thunk";
 
 import { AuthAction, authReducer, IAuthState } from "./Auth";
-import { employeeReducer, IEmployeeState } from "./Employee";
+import {
+  createEmployeeEpic,
+  employeeReducer,
+  IEmployeeState,
+} from "./Employee";
 import {
   employeesReducer,
   employeesSubscriptionEpic,
@@ -16,7 +20,7 @@ const rootReducer = combineReducers({
   employees: employeesReducer,
 });
 
-const rootEpic = combineEpics(employeesSubscriptionEpic);
+const rootEpic = combineEpics(createEmployeeEpic, employeesSubscriptionEpic);
 
 const epicMiddleware = createEpicMiddleware();
 

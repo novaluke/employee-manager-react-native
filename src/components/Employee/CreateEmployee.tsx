@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { NavigationScreenProp, NavigationScreenProps } from "react-navigation";
 import { connect } from "react-redux";
 
 import { AsyncValue, IRootState } from "../../store";
@@ -13,15 +12,12 @@ import {
 import { AsyncButton, Card, CardSection } from "../common";
 import EmployeeForm, { IFormProps } from "./EmployeeForm";
 
-interface IProps extends IFormProps, NavigationScreenProps {
+interface IProps extends IFormProps {
   employeeName: string;
   phone: string;
   shift: ShiftDay;
   createAction: AsyncValue<null>;
-  dispatchCreateEmployee: (
-    employee: IEmployee<null>,
-    navigation: NavigationScreenProp<any>,
-  ) => void;
+  dispatchCreateEmployee: (employee: IEmployee<null>) => void;
   dispatchResetForm: () => void;
 }
 
@@ -42,18 +38,14 @@ class CreateEmployee extends Component<IProps> {
       shift,
       dispatchCreateEmployee,
       createAction,
-      navigation,
     } = this.props;
     const onCreateEmployee = () =>
-      dispatchCreateEmployee(
-        {
-          employeeName,
-          phone,
-          shift,
-          uid: null,
-        },
-        navigation,
-      );
+      dispatchCreateEmployee({
+        employeeName,
+        phone,
+        shift,
+        uid: null,
+      });
     return (
       <Card>
         <EmployeeForm {...this.props} />

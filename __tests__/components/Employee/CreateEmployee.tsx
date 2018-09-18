@@ -88,10 +88,12 @@ describe("CreateEmployee", () => {
     button.simulate("press");
 
     expect(createEmployee).toHaveBeenCalledTimes(1);
-    expect(createEmployee).toHaveBeenCalledWith(
-      { employeeName, phone, shift, uid: null },
-      props.navigation,
-    );
+    expect(createEmployee).toHaveBeenCalledWith({
+      employeeName,
+      phone,
+      shift,
+      uid: null,
+    });
   });
 
   it("sets the page title", () => {
