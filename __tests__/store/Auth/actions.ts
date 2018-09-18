@@ -1,16 +1,21 @@
 import "jest-enzyme";
 
 import firebase from "firebase";
-import { NavigationScreenProp } from "react-navigation";
+import { of } from "rxjs";
+import { marbles } from "rxjs-marbles/jest";
+import { toArray } from "rxjs/operators";
 
-import { stubNavigation } from "../../helpers/react-navigation";
-
+import { navigate } from "../../../src/NavigationService";
 import {
+  AuthAction,
   AuthActionType,
   emailChanged,
   logIn,
+  logInEpic,
   passwordChanged,
 } from "../../../src/store/Auth";
+
+jest.mock("../../../src/NavigationService");
 
 describe("Auth action creators", () => {
   describe("emailChanged", () => {
@@ -33,132 +38,155 @@ describe("Auth action creators", () => {
   });
 
   describe("logIn", () => {
-    const authReturn: Partial<firebase.auth.Auth> = {};
-    let navigation: NavigationScreenProp<any>;
-    beforeEach(() => {
-      navigation = stubNavigation();
-      (firebase.auth as any).mockImplementation(() => authReturn);
-    });
-
-    it("first dispatches the login request started action", () => {
-      const signInMock = jest.fn(() => new Promise(() => ({})));
-      authReturn.signInWithEmailAndPassword = signInMock;
-      const dispatch = jest.fn();
-
-      logIn("", "", navigation)(dispatch);
-
-      expect(dispatch).toHaveBeenNthCalledWith(1, {
-        type: AuthActionType.LOGIN_START,
-      });
-    });
-
-    it("tries to sign in to firebase with the email and password", () => {
+    it("creates the action to log in with the given email and password", () => {
       const email = "user@example.com";
-      const password = "mypassword";
-      const signInMock = jest.fn(() => Promise.resolve());
-      authReturn.signInWithEmailAndPassword = signInMock;
-
-      return logIn(email, password, navigation)(jest.fn()).then(() => {
-        expect(signInMock).toHaveBeenCalledTimes(1);
-        expect(signInMock).toHaveBeenCalledWith(email, password);
-      });
+      const password = "secretpassword";
+      const expectedAction = {
+        payload: { email, password },
+        type: AuthActionType.LOG_IN,
+      };
+      expect(logIn(email, password)).toEqual(expectedAction);
     });
+  });
 
-    describe("when login fails", () => {
-      it("tries to create a user with the email and password", () => {
-        const email = "user@example.com";
-        const password = "mypassword";
-        const signUpMock = jest.fn(() => Promise.resolve());
-        const signInPromise = Promise.reject();
-        authReturn.createUserWithEmailAndPassword = signUpMock;
-        authReturn.signInWithEmailAndPassword = jest.fn(() => signInPromise);
-
-        return logIn(email, password, navigation)(jest.fn()).then(() => {
-          expect(signUpMock).toHaveBeenCalledTimes(1);
-          expect(signUpMock).toHaveBeenCalledWith(email, password);
-        });
+  describe("logInEpic", () => {
+    describe("after the log in action is dispatched", () => {
+      const email = "user@example.com";
+      const password = "secretpassword";
+      const testAction = logIn(email, password);
+      const authReturn: Partial<firebase.auth.Auth> = {
+        signInWithEmailAndPassword: jest.fn(() => new Promise(() => null)),
+      };
+      beforeEach(() => {
+        (firebase.auth as any).mockImplementation(() => authReturn);
       });
 
-      describe("and automatic user creation fails", () => {
-        it("dispatches the login failure action", () => {
-          const dispatch = jest.fn();
-          authReturn.createUserWithEmailAndPassword = jest.fn(() =>
-            Promise.reject(),
-          );
-          authReturn.signInWithEmailAndPassword = jest.fn(() =>
-            Promise.reject(),
-          );
+      it(
+        "first emits the login request started action",
+        marbles(m => {
+          const values = {
+            a: testAction,
+            b: { type: AuthActionType.LOGIN_START } as AuthAction,
+          };
+          const action$ = m.cold("  -a-", values);
+          const expected$ = m.cold("-b-", values);
 
-          return logIn("", "", navigation)(dispatch).then(() => {
-            expect(dispatch).toHaveBeenCalledWith({
-              type: AuthActionType.LOGIN_FAIL,
+          m.expect(logInEpic(action$)).toBeObservable(expected$);
+        }),
+      );
+
+      it("tries to log in to firebase with the email and password", () => {
+        const action$ = of(testAction);
+        const mockSignIn = authReturn.signInWithEmailAndPassword;
+
+        logInEpic(action$).subscribe(jest.fn());
+
+        expect(mockSignIn).toHaveBeenCalledTimes(1);
+        expect(mockSignIn).toHaveBeenCalledWith(email, password);
+      });
+
+      describe("when login fails", () => {
+        beforeEach(() => {
+          authReturn.signInWithEmailAndPassword = () => Promise.reject();
+        });
+
+        it("tries to create a user with the email and password", done => {
+          const action$ = of(testAction);
+          const mockCreate = jest.fn();
+          authReturn.createUserWithEmailAndPassword = mockCreate;
+
+          logInEpic(action$)
+            .toPromise()
+            .then(() => {
+              expect(mockCreate).toHaveBeenCalledTimes(1);
+              expect(mockCreate).toHaveBeenCalledWith(email, password);
+              done();
             });
+        });
+
+        describe("and automatic user creation fails", () => {
+          beforeEach(() => {
+            authReturn.createUserWithEmailAndPassword = () => Promise.reject();
+          });
+
+          it("emits the login failure action", done => {
+            const action$ = of(testAction);
+            const failureAction = { type: AuthActionType.LOGIN_FAIL };
+
+            logInEpic(action$)
+              .pipe(toArray())
+              .subscribe(emitted => {
+                expect(emitted).toContainEqual(failureAction);
+                done();
+              });
           });
         });
-      });
 
-      describe("and automatic user creation succeeds", () => {
-        it("dispatches the user logged in action with the user as payload", () => {
-          const user = {};
-          const dispatch = jest.fn();
-          authReturn.createUserWithEmailAndPassword = jest.fn(() =>
-            Promise.resolve(user),
-          );
-          authReturn.signInWithEmailAndPassword = jest.fn(() =>
-            Promise.reject(),
-          );
+        describe("and automatic user creation succeeds", () => {
+          const createdUser = {};
+          beforeEach(() => {
+            authReturn.createUserWithEmailAndPassword = () =>
+              Promise.resolve(createdUser);
+          });
 
-          return logIn("", "", navigation)(dispatch).then(() => {
-            expect(dispatch).toHaveBeenCalledWith({
-              payload: user,
+          it("emits the user logged in action with the user as payload", done => {
+            const action$ = of(testAction);
+            const expectedAction = {
+              payload: createdUser,
               type: AuthActionType.LOGIN_SUCCESS,
-            });
+            };
+
+            logInEpic(action$)
+              .pipe(toArray())
+              .subscribe(emitted => {
+                expect(emitted).toContainEqual(expectedAction);
+                done();
+              });
           });
-        });
 
-        it("redirects to the main navigation stack", () => {
-          authReturn.createUserWithEmailAndPassword = jest.fn(() =>
-            Promise.resolve(),
-          );
-          authReturn.signInWithEmailAndPassword = jest.fn(() =>
-            Promise.reject(),
-          );
-          expect(navigation.navigate).not.toHaveBeenCalled();
+          it("redirects to the main navigation stack", done => {
+            const action$ = of(testAction);
 
-          return logIn("", "", navigation)(jest.fn()).then(() => {
-            expect(navigation.navigate).toHaveBeenCalledTimes(1);
-            expect(navigation.navigate).toHaveBeenCalledWith("Main");
+            logInEpic(action$)
+              .toPromise()
+              .then(() => {
+                expect(navigate).toHaveBeenCalledWith("Main");
+                done();
+              });
           });
         });
       });
-    });
 
-    describe("when login succeeds", () => {
-      it("dispatches the user logged in action with the user as payload", () => {
+      describe("when login succeeds", () => {
         const user = {};
-        const dispatch = jest.fn();
-        authReturn.signInWithEmailAndPassword = jest.fn(() =>
-          Promise.resolve(user),
-        );
+        beforeEach(() => {
+          authReturn.signInWithEmailAndPassword = () => Promise.resolve(user);
+        });
 
-        return logIn("", "", navigation)(dispatch).then(() => {
-          expect(dispatch).toHaveBeenCalledWith({
+        it("dispatches the user logged in action with the user as payload", done => {
+          const action$ = of(testAction);
+          const expectedAction = {
             payload: user,
             type: AuthActionType.LOGIN_SUCCESS,
-          });
+          };
+
+          logInEpic(action$)
+            .pipe(toArray())
+            .subscribe(emitted => {
+              expect(emitted).toContainEqual(expectedAction);
+              done();
+            });
         });
-      });
 
-      it("redirects to the main navigation stack", () => {
-        const user = {};
-        authReturn.signInWithEmailAndPassword = jest.fn(() =>
-          Promise.resolve(user),
-        );
-        expect(navigation.navigate).not.toHaveBeenCalled();
+        it("redirects to the main navigation stack", done => {
+          const action$ = of(testAction);
 
-        return logIn("", "", navigation)(jest.fn()).then(() => {
-          expect(navigation.navigate).toHaveBeenCalledTimes(1);
-          expect(navigation.navigate).toHaveBeenCalledWith("Main");
+          logInEpic(action$)
+            .toPromise()
+            .then(() => {
+              expect(navigate).toHaveBeenCalledWith("Main");
+              done();
+            });
         });
       });
     });
