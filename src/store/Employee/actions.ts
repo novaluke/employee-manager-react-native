@@ -10,7 +10,7 @@ import { IEmployee, IEmployeeState, ShiftDay } from "./reducer";
 
 import { navigate } from "../../NavigationService";
 import { Action } from "../common/Async";
-import { firebasePush, firebaseSet } from "../common/Firebase";
+import { firebasePush, firebaseRemove, firebaseSet } from "../common/Firebase";
 
 export enum EmployeeActionType {
   UPDATE_FIELD = "UPDATE_FIELD",
@@ -23,6 +23,7 @@ export enum EmployeeActionType {
   UPDATE_EMPLOYEE = "UPDATE_EMPLOYEE",
   UPDATE_ACTION = "UPDATE_ACTION",
   FIRE_ACTION = "FIRE_ACTION",
+  FIRE_EMPLOYEE = "FIRE_EMPLOYEE",
 }
 
 export type FieldUpdatePayload =
@@ -48,6 +49,7 @@ export type EmployeeAction =
       type: EmployeeActionType.UPDATE_ACTION;
       payload: Action<string, null, IEmployeeState>;
     }
+  | { type: EmployeeActionType.FIRE_EMPLOYEE; payload: string }
   | {
       type: EmployeeActionType.FIRE_ACTION;
       payload: Action<string, null, IEmployeeState>;
@@ -170,48 +172,51 @@ export const updateEmployeeEpic = (
     switchAll(),
   );
 
-const fireSuccess = (
-  dispatch: EmployeeDispatch,
-  navigation: NavigationScreenProp<any>,
-) => () => {
-  navigation.navigate("EmployeeList");
-  dispatch({
-    payload: Action.success(null),
-    type: EmployeeActionType.FIRE_ACTION,
-  });
-};
-
-const fireFail = (dispatch: EmployeeDispatch) => () =>
-  dispatch({
-    payload: Action.failure(""),
-    type: EmployeeActionType.FIRE_ACTION,
-  });
-
 export const showFireModal = () => createAction(EmployeeActionType.SHOW_MODAL);
 export const closeFireModal = () =>
   createAction(EmployeeActionType.CLOSE_MODAL);
 
-export const fireEmployee = (
-  uid: string | null,
-  navigation: NavigationScreenProp<any>,
-) => (dispatch: EmployeeDispatch) => {
-  const { currentUser } = firebase.auth();
-  if (currentUser === null) {
-    navigation.navigate("Auth");
-  } else if (uid === null) {
-    // TODO handle this better, either by making it impossible to get here (via
-    // type safety) or showing an error message at least
-    navigation.navigate("EmployeeList");
-  } else {
-    dispatch({
-      payload: Action.start(),
-      type: EmployeeActionType.FIRE_ACTION,
-    });
-    return firebase
-      .database()
-      .ref(`/users/${currentUser.uid}/employees/${uid}`)
-      .remove()
-      .then(fireSuccess(dispatch, navigation), fireFail(dispatch));
-  }
-  return Promise.reject();
-};
+export const fireEmployee = (uid: string) =>
+  createAction(EmployeeActionType.FIRE_EMPLOYEE, uid);
+
+const handleFireSuccess = pipe(
+  tap<any>(() => navigate("EmployeeList")),
+  mapTo<any, EmployeeAction>({
+    payload: Action.success(null),
+    type: EmployeeActionType.FIRE_ACTION,
+  }),
+);
+
+const handleFireFail = () =>
+  of<EmployeeAction>({
+    payload: Action.failure(""),
+    type: EmployeeActionType.FIRE_ACTION,
+  });
+
+export const fireEmployeeEpic = (
+  action$: Observable<EmployeeAction>,
+): Observable<EmployeeAction> =>
+  action$.pipe(
+    ofType(EmployeeActionType.FIRE_EMPLOYEE),
+    map(action => {
+      const { currentUser } = firebase.auth();
+      if (currentUser === null) {
+        navigate("Auth");
+      } else if (action.type === EmployeeActionType.FIRE_EMPLOYEE) {
+        const uid = action.payload;
+        return of<EmployeeAction>({
+          payload: Action.start(),
+          type: EmployeeActionType.FIRE_ACTION,
+        }).pipe(
+          concat(
+            firebaseRemove(`/users/${currentUser.uid}/employees/${uid}`).pipe(
+              handleFireSuccess,
+              catchError(handleFireFail),
+            ),
+          ),
+        );
+      }
+      return empty();
+    }),
+    switchAll(),
+  );

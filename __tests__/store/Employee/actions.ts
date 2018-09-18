@@ -17,6 +17,7 @@ import {
   EmployeeAction,
   EmployeeActionType,
   fireEmployee,
+  fireEmployeeEpic,
   IEmployee,
   resetForm,
   ShiftDay,
@@ -333,10 +334,151 @@ describe("updateEmployeeEpic", () => {
   });
 });
 
+describe("fireEmployeeEpic", () => {
+  let testAction: EmployeeAction;
+  const employeeUid = "uid1";
+  const mockUser = { uid: "uid1" };
+  const mockRemove = jest.fn();
+  const mockRef = jest.fn();
+  beforeEach(() => {
+    testAction = fireEmployee(employeeUid);
+    (firebase.database as any).mockImplementation(() => ({ ref: mockRef }));
+    mockRef.mockImplementation(() => ({ remove: mockRemove }));
+    mockRemove.mockImplementation(() => new Promise(() => null));
+  });
+
+  describe("when not logged in", () => {
+    beforeEach(() => {
+      (firebase.auth as any).mockImplementation(() => ({ currentUser: null }));
+    });
+
+    it(
+      "emits no actions",
+      marbles(m => {
+        const values = {
+          a: testAction,
+        };
+        const action$ = m.cold("-a-|", values);
+        const expected$ = "---|";
+
+        m.expect(fireEmployeeEpic(action$)).toBeObservable(expected$);
+      }),
+    );
+
+    it("does not attempt to fire the employee", () => {
+      const action$ = of(testAction);
+
+      fireEmployeeEpic(action$).subscribe(jest.fn());
+
+      expect(mockRemove).not.toHaveBeenCalled();
+    });
+
+    it("redirects to the Auth route", () => {
+      const action$ = of(testAction);
+
+      fireEmployeeEpic(action$).subscribe(jest.fn());
+
+      expect(navigate).toHaveBeenCalledWith("Auth");
+    });
+  });
+
+  describe("when logged in", () => {
+    beforeEach(() => {
+      (firebase.auth as any).mockImplementation(() => ({
+        currentUser: mockUser,
+      }));
+    });
+
+    describe("after FIRE_EMPLOYEE is dispatched", () => {
+      it(
+        "emits the fire request started action",
+        marbles(m => {
+          const values = {
+            a: testAction,
+            b: {
+              payload: Action.start(),
+              type: EmployeeActionType.FIRE_ACTION,
+            } as EmployeeAction,
+          };
+          const action$ = m.cold("  -a-", values);
+          const expected$ = m.cold("-b-", values);
+
+          m.expect(fireEmployeeEpic(action$)).toBeObservable(expected$);
+        }),
+      );
+
+      it("sends a request to remove the employee from firebase", () => {
+        const action$ = of(testAction);
+
+        fireEmployeeEpic(action$).subscribe(jest.fn());
+
+        expect(mockRef).toHaveBeenCalledTimes(1);
+        expect(mockRef).toHaveBeenCalledWith(
+          `/users/${mockUser.uid}/employees/${employeeUid}`,
+        );
+
+        expect(mockRemove).toHaveBeenCalledTimes(1);
+      });
+
+      describe("when removal is successful", () => {
+        beforeEach(() => {
+          mockRemove.mockImplementation(() => Promise.resolve());
+        });
+
+        it("emits the fire successful action", done => {
+          const action$ = of(testAction);
+          const resultAction: EmployeeAction = {
+            payload: Action.success(null),
+            type: EmployeeActionType.FIRE_ACTION,
+          };
+
+          fireEmployeeEpic(action$)
+            .pipe(toArray())
+            .subscribe(emitted => {
+              expect(emitted).toContainEqual(resultAction);
+              done();
+            });
+        });
+
+        it("navigates to the employee list route", done => {
+          const action$ = of(testAction);
+
+          fireEmployeeEpic(action$).subscribe({
+            complete: () => {
+              expect(navigate).toHaveBeenCalledWith("EmployeeList");
+              done();
+            },
+          });
+        });
+      });
+
+      describe("when removal fails", () => {
+        beforeEach(() => {
+          mockRemove.mockImplementation(() => Promise.reject());
+        });
+
+        it("emits the fire failed action", done => {
+          const action$ = of(testAction);
+          const resultAction: EmployeeAction = {
+            payload: Action.failure(expect.any(String)),
+            type: EmployeeActionType.FIRE_ACTION,
+          };
+
+          fireEmployeeEpic(action$)
+            .pipe(toArray())
+            .subscribe(emitted => {
+              expect(emitted).toContainEqual(resultAction);
+              done();
+            });
+        });
+      });
+    });
+  });
+});
+
 describe("Employee actions", () => {
   let testEmployee: IEmployee<string>;
   let navigation: NavigationScreenProp<any>;
-  let user: { uid: string };
   const dispatch = jest.fn();
   beforeEach(() => {
     testEmployee = {
@@ -346,7 +488,6 @@ describe("Employee actions", () => {
       uid: "uid1",
     };
     navigation = stubNavigation();
-    user = { uid: "uid1" };
   });
 
   describe("updateField", () => {
@@ -431,96 +572,13 @@ describe("Employee actions", () => {
   });
 
   describe("fireEmployee", () => {
-    const runAction = (uid = "") => fireEmployee(uid, navigation)(dispatch);
-
-    describe("when not logged in", () => {
-      it("redirects to the Auth route", () => {
-        (firebase.auth as any).mockImplementation(() => ({
-          currentUser: null,
-        }));
-
-        expect(navigation.navigate).not.toHaveBeenCalled();
-        runAction();
-
-        expect(navigation.navigate).toHaveBeenCalledTimes(1);
-        expect(navigation.navigate).toHaveBeenCalledWith("Auth");
-      });
-    });
-
-    describe("when logged in", () => {
-      const remove = jest.fn();
-      const ref = jest.fn();
-      beforeEach(() => {
-        (firebase.auth as any).mockImplementation(() => ({
-          currentUser: user,
-        }));
-        (firebase.database as any).mockImplementation(() => ({ ref }));
-        ref.mockImplementation(() => ({ remove }));
-      });
-
-      it("dispatches the 'fire employee' started action", () => {
-        // Assuming the dispatch is synchronous and the test can therefore be
-        // done without waiting for the Promise would couple the test too
-        // tightly, so the promise has to be completed one way or another before
-        // checking the dispatch (even though it doesn't matter if it resolves
-        // or rejects)
-        remove.mockImplementation(() => Promise.resolve());
-
-        return runAction().then(() => {
-          expect(dispatch).toHaveBeenCalledWith({
-            payload: Action.start(),
-            type: EmployeeActionType.FIRE_ACTION,
-          });
-        });
-      });
-
-      it("deletes the employee from firebase", () => {
-        const { uid } = testEmployee;
-        const refString = `/users/${user.uid}/employees/${uid}`;
-        remove.mockImplementation(() => Promise.resolve());
-
-        expect(ref).not.toHaveBeenCalled();
-        expect(remove).not.toHaveBeenCalled();
-
-        return runAction(uid).then(() => {
-          expect(ref).toHaveBeenCalledTimes(1);
-          expect(ref).toHaveBeenCalledWith(refString);
-          expect(remove).toHaveBeenCalledTimes(1);
-        });
-      });
-
-      describe("when firing succeeds", () => {
-        beforeEach(() => {
-          remove.mockImplementation(() => Promise.resolve());
-        });
-
-        it("dispatches the 'fire employee' success action", () =>
-          runAction().then(() => {
-            expect(dispatch).toHaveBeenCalledWith({
-              payload: Action.success(null),
-              type: EmployeeActionType.FIRE_ACTION,
-            });
-          }));
-
-        it("navigates to the employee list", () =>
-          runAction().then(() => {
-            expect(navigation.navigate).toHaveBeenCalledTimes(1);
-            expect(navigation.navigate).toHaveBeenCalledWith("EmployeeList");
-          }));
-      });
-
-      describe("when firing fails", () => {
-        it("dispatches the 'fire employee' failure action", () => {
-          remove.mockImplementation(() => Promise.reject());
-
-          return runAction().then(() => {
-            expect(dispatch).toHaveBeenCalledWith({
-              payload: Action.failure(expect.any(String)),
-              type: EmployeeActionType.FIRE_ACTION,
-            });
-          });
-        });
-      });
+    it("creates the action to fire the employee with the given uid", () => {
+      const { uid } = testEmployee;
+      const expectedAction = {
+        payload: uid,
+        type: EmployeeActionType.FIRE_EMPLOYEE,
+      };
+      expect(fireEmployee(uid)).toEqual(expectedAction);
     });
   });
 });

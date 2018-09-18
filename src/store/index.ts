@@ -6,6 +6,7 @@ import { AuthAction, authReducer, IAuthState } from "./Auth";
 import {
   createEmployeeEpic,
   employeeReducer,
+  fireEmployeeEpic,
   IEmployeeState,
   updateEmployeeEpic,
 } from "./Employee";
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
 
 const rootEpic = combineEpics(
   createEmployeeEpic,
+  fireEmployeeEpic,
   updateEmployeeEpic,
   employeesSubscriptionEpic,
 );

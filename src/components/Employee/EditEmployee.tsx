@@ -30,10 +30,7 @@ interface IProps extends IFormProps, NavigationScreenProps {
   dispatchUpdateEmployee: (employee: IEmployee<string>) => void;
   dispatchResetForm: () => void;
   dispatchCloseModal: () => void;
-  dispatchFireEmployee: (
-    uid: string | null,
-    navigation: NavigationScreenProp<any>,
-  ) => void;
+  dispatchFireEmployee: (uid: string) => void;
 }
 
 const textSchedule = (phone: string, shift: ShiftDay) => () =>
@@ -74,7 +71,7 @@ class EditEmployee extends Component<IProps> {
       navigation.navigate("EmployeeList");
       return null;
     }
-    const onFireEmployee = () => dispatchFireEmployee(uid, navigation);
+    const onFireEmployee = () => dispatchFireEmployee(uid);
     const onUpdateEmployee = () =>
       dispatchUpdateEmployee({
         employeeName,

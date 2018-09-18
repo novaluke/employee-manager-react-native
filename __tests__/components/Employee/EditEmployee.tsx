@@ -168,7 +168,7 @@ describe("EditEmployee", () => {
         modal.simulate("yes");
 
         expect(fireEmployee).toHaveBeenCalledTimes(1);
-        expect(fireEmployee).toHaveBeenCalledWith(uid, props.navigation);
+        expect(fireEmployee).toHaveBeenCalledWith(uid);
       });
     });
     describe("when rejected", () => {
