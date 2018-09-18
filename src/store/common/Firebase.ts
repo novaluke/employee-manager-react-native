@@ -42,3 +42,18 @@ export function firebasePush(
     },
   );
 }
+
+export function firebaseSet(refPath: string, payload: any): Observable<void> {
+  return Observable.create(
+    (observer: Observer<void>): TeardownLogic => {
+      firebase
+        .database()
+        .ref(refPath)
+        .set(payload)
+        // Can't pass the observer functions directly or else they throw errors
+        // for some reason
+        .then(x => observer.next(x), e => observer.error(e))
+        .then(() => observer.complete());
+    },
+  );
+}

@@ -3,7 +3,11 @@ import "jest-enzyme";
 import firebase from "firebase";
 import { toArray } from "rxjs/operators";
 
-import { firebaseOn, firebasePush } from "../../../src/store/common/Firebase";
+import {
+  firebaseOn,
+  firebasePush,
+  firebaseSet,
+} from "../../../src/store/common/Firebase";
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -133,6 +137,76 @@ describe("firebase helpers", () => {
           });
 
           rejectPush(error);
+        });
+      });
+    });
+  });
+
+  describe("firebaseSet", () => {
+    const mockRef = jest.fn();
+    const mockSet = jest.fn();
+    const refPath = "foo";
+    const payload = { foo: "foo" };
+    let resolveSet: (x: any) => void;
+    let rejectSet: (x: any) => void;
+    beforeEach(() => {
+      (firebase.database as any).mockImplementation(() => ({ ref: mockRef }));
+      mockRef.mockImplementation(() => ({ set: mockSet }));
+      mockSet.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            resolveSet = resolve;
+            rejectSet = reject;
+          }),
+      );
+    });
+
+    describe("when subscribed to", () => {
+      it("sets the payload at the firebase refPath", () => {
+        firebaseSet(refPath, payload).subscribe(jest.fn());
+
+        expect(mockRef).toHaveBeenCalledTimes(1);
+        expect(mockRef).toHaveBeenCalledWith(refPath);
+
+        expect(mockSet).toHaveBeenCalledTimes(1);
+        expect(mockSet).toHaveBeenCalledWith(payload);
+      });
+
+      describe("when set is successful", () => {
+        it("emits the result", done => {
+          const result = { bar: "bar" };
+          firebaseSet(refPath, payload)
+            .pipe(toArray())
+            .subscribe(results => {
+              expect(results).toEqual([result]);
+              done();
+            });
+          resolveSet(result);
+        });
+
+        it("completes the stream", done => {
+          // No expectations here since the only requirement is that it reaches
+          // `done` - if it doesn't, it will fail due to timeout
+          firebaseSet(refPath, payload)
+            .toPromise()
+            .then(done);
+
+          resolveSet(null);
+        });
+      });
+
+      describe("when set is unsuccessful", () => {
+        it("emits the error from set", done => {
+          const error = { reason: "For science!" };
+
+          firebaseSet(refPath, payload).subscribe({
+            error: e => {
+              expect(e).toBe(error);
+              done();
+            },
+          });
+
+          rejectSet(error);
         });
       });
     });
