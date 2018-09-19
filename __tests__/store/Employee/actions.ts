@@ -1,12 +1,9 @@
 import "jest-enzyme";
 
 import firebase from "firebase";
-import { NavigationScreenProp } from "react-navigation";
 import { of } from "rxjs";
 import { marbles } from "rxjs-marbles/jest";
 import { toArray } from "rxjs/operators";
-
-import { stubNavigation } from "../../helpers/react-navigation";
 
 import { Action } from "../../../src/store/common/Async";
 import {
@@ -478,7 +475,6 @@ describe("fireEmployeeEpic", () => {
 
 describe("Employee actions", () => {
   let testEmployee: IEmployee<string>;
-  let navigation: NavigationScreenProp<any>;
   beforeEach(() => {
     testEmployee = {
       employeeName: "Taylor",
@@ -486,7 +482,6 @@ describe("Employee actions", () => {
       shift: ShiftDay.Friday,
       uid: "uid1",
     };
-    navigation = stubNavigation();
   });
 
   describe("updateField", () => {
@@ -514,7 +509,7 @@ describe("Employee actions", () => {
 
   describe("editEmployee", () => {
     const runAction = (employee: IEmployee<string>) =>
-      editEmployee(employee, navigation);
+      editEmployee(employee);
 
     it("creates the edit action with the employee as payload", () => {
       expect(runAction(testEmployee)).toEqual({
@@ -528,8 +523,8 @@ describe("Employee actions", () => {
 
       runAction(testEmployee);
 
-      expect(navigation.navigate).toHaveBeenCalledTimes(1);
-      expect(navigation.navigate).toHaveBeenCalledWith("EditEmployee", {
+      expect(navigate).toHaveBeenCalledTimes(1);
+      expect(navigate).toHaveBeenCalledWith("EditEmployee", {
         employeeName,
       });
     });

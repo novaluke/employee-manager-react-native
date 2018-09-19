@@ -1,5 +1,4 @@
 import firebase from "firebase";
-import { NavigationScreenProp } from "react-navigation";
 import { ofType } from "redux-observable";
 import { empty, Observable, of, pipe } from "rxjs";
 import { catchError, concat, map, mapTo, switchAll, tap } from "rxjs/operators";
@@ -105,11 +104,8 @@ export const createEmployeeEpic = (
     switchAll(),
   );
 
-export const editEmployee = (
-  employee: IEmployee<string>,
-  navigation: NavigationScreenProp<any>,
-) => {
-  navigation.navigate("EditEmployee", { employeeName: employee.employeeName });
+export const editEmployee = (employee: IEmployee<string>) => {
+  navigate("EditEmployee", { employeeName: employee.employeeName });
   return createAction(EmployeeActionType.EDIT, employee);
 };
 
