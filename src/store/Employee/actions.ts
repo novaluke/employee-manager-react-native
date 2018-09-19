@@ -1,7 +1,14 @@
 import firebase from "firebase";
 import { ofType } from "redux-observable";
 import { empty, Observable, of, pipe } from "rxjs";
-import { catchError, concat, map, mapTo, switchAll, tap } from "rxjs/operators";
+import {
+  catchError,
+  map,
+  mapTo,
+  startWith,
+  switchAll,
+  tap,
+} from "rxjs/operators";
 import { action as createAction } from "typesafe-actions";
 
 import { IEmployee, IEmployeeState, ShiftDay } from "./reducer";
@@ -87,16 +94,17 @@ export const createEmployeeEpic = (
         // properly, unless we want to specify the type parameter in `ofType`,
         // which is slightly more verbose than this `else if`
         const { payload } = action;
-        return of<EmployeeAction>({
-          payload: Action.start(),
-          type: EmployeeActionType.CREATE_ACTION,
-        }).pipe(
-          concat(
-            firebasePush(`/users/${currentUser.uid}/employees`, payload).pipe(
-              handleCreateSuccess,
-              catchError(handleCreateFail),
-            ),
-          ),
+        return firebasePush(
+          `/users/${currentUser.uid}/employees`,
+          payload,
+        ).pipe(
+          handleCreateSuccess,
+          catchError(handleCreateFail),
+          // Must come after handleCreateSuccess to avoid getting mapped by it
+          startWith<EmployeeAction, EmployeeAction>({
+            payload: Action.start(),
+            type: EmployeeActionType.CREATE_ACTION,
+          }),
         );
       }
       return empty();
@@ -145,19 +153,16 @@ export const updateEmployeeEpic = (
         const {
           payload: { uid, ...employee },
         } = action;
-        return of<EmployeeAction>({
-          payload: Action.start(),
-          type: EmployeeActionType.UPDATE_ACTION,
-        }).pipe(
-          concat(
-            firebaseSet(
-              `/users/${currentUser.uid}/employees/${uid}`,
-              employee,
-            ).pipe(
-              handleUpdateSuccess,
-              catchError(handleUpdateFail),
-            ),
-          ),
+        return firebaseSet(
+          `/users/${currentUser.uid}/employees/${uid}`,
+          employee,
+        ).pipe(
+          handleUpdateSuccess,
+          catchError(handleUpdateFail),
+          startWith<EmployeeAction, EmployeeAction>({
+            payload: Action.start(),
+            type: EmployeeActionType.UPDATE_ACTION,
+          }),
         );
       }
       return empty();
@@ -197,16 +202,15 @@ export const fireEmployeeEpic = (
         navigate("Auth");
       } else if (action.type === EmployeeActionType.FIRE_EMPLOYEE) {
         const uid = action.payload;
-        return of<EmployeeAction>({
-          payload: Action.start(),
-          type: EmployeeActionType.FIRE_ACTION,
-        }).pipe(
-          concat(
-            firebaseRemove(`/users/${currentUser.uid}/employees/${uid}`).pipe(
-              handleFireSuccess,
-              catchError(handleFireFail),
-            ),
-          ),
+        return firebaseRemove(
+          `/users/${currentUser.uid}/employees/${uid}`,
+        ).pipe(
+          handleFireSuccess,
+          catchError(handleFireFail),
+          startWith<EmployeeAction, EmployeeAction>({
+            payload: Action.start(),
+            type: EmployeeActionType.FIRE_ACTION,
+          }),
         );
       }
       return empty();

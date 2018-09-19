@@ -1,7 +1,7 @@
 import firebase from "firebase";
 import { ofType } from "redux-observable";
 import { empty, from, Observable, of, pipe } from "rxjs";
-import { catchError, concat, map, switchAll, tap } from "rxjs/operators";
+import { catchError, map, startWith, switchAll, tap } from "rxjs/operators";
 import { action as createAction } from "typesafe-actions";
 
 import { navigate } from "../../NavigationService";
@@ -58,20 +58,15 @@ export const logInEpic = (
         return empty();
       }
       const { email, password } = action.payload;
-      return of(createAction(AuthActionType.LOGIN_START)).pipe(
-        concat(
-          from(
-            firebase.auth().signInWithEmailAndPassword(email, password),
-          ).pipe(
-            catchError(() =>
-              from(
-                firebase.auth().createUserWithEmailAndPassword(email, password),
-              ),
-            ),
-            handleLoginSuccess,
-            catchError(handleLoginFail),
-          ),
+      return from(
+        firebase.auth().signInWithEmailAndPassword(email, password),
+      ).pipe(
+        catchError(() =>
+          from(firebase.auth().createUserWithEmailAndPassword(email, password)),
         ),
+        handleLoginSuccess,
+        catchError(handleLoginFail),
+        startWith(createAction(AuthActionType.LOGIN_START)),
       );
     }),
     switchAll(),
